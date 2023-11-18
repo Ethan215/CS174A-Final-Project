@@ -18,4 +18,11 @@ In "The Soccer Challenge" players step into the shoes of Mike, a young soccer en
 This soccer training game will create a diverse challenge environment for Mike by putting different types and shapes of obstacles on the soccer field. The placement of obstacles will cover scenarios encountered during a soccer match, including unexpected situations.\<br>
 
 
-        
+
+
+
+
+
+
+
+
