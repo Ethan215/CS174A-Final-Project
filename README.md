@@ -1,6 +1,6 @@
 # CS174A-Final-Project
 
-## Project Proposal name: The Soccer Challenge
+## Project name: The Soccer Challenge
 
 ### Team members:
 
