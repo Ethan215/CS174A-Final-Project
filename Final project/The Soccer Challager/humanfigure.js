@@ -68,8 +68,6 @@ export class Main extends Scene {
         this.stop = false
         this.right = false
         this.firstclick = true
-        this.multiple = false
-        this.doubleclick = [this.back, this.forward, this.right, this.left]
         this.face = "forward"
         this.model_transform = Mat4.identity()
         this.model_transform_init = Mat4.identity()
@@ -84,7 +82,9 @@ export class Main extends Scene {
     }
 
     make_control_panel() {
-        // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
+        // Use the direction buttons to control the human figure
+        // update the face to keep track of the current direction
+        // Only rotate when the button is first clicked
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
             this.forward = true
@@ -99,8 +99,6 @@ export class Main extends Scene {
             this.face = "forward"
             this.shapes.human.fb = true
             
-
-            
             
         }, undefined, () => {
             this.moving = false
@@ -108,7 +106,6 @@ export class Main extends Scene {
             this.firstclick = true
         });
 
-        // Move backward
         this.key_triggered_button("Move Backward", ["ArrowDown"], () => {
             this.moving = true
             this.back = true
@@ -188,6 +185,8 @@ export class Main extends Scene {
     }
 
     display(context, program_state) {
+        //code copied from assignment4, adjust the initial camera location
+        //if you dont want to move the camera location, comment the if statement but preserve program_state.set_camera
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
@@ -208,7 +207,7 @@ export class Main extends Scene {
         model_transform = model_transform.times(Mat4.scale(.4, .4, .4))
                                             .times (Mat4.rotation(Math.PI, 0, 1, 0))
                                             
-
+        //moving logic
         if (this.moving) { 
             if (this.forward && (!this.stop||this.back)) {
                 this.move_human_figure(1, true, program_state)
@@ -239,7 +238,7 @@ export class Main extends Scene {
 
 
 
-    
+        //draw obstacles and human
         this.shapes.human.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(5,5.3,0)), this.materials.phong)
         
         //this.shapes.tube.draw(context, program_state, model_transform_human, this.materials.texture)
@@ -268,7 +267,7 @@ export class Main extends Scene {
     }
 }
 
-
+    //It is the updated version, bounding box is added to the constructor
     class SceneGraph{
         constructor(geometry = true, name = "", material, model_transform = Mat4.identity()) {
             this.model_transform = model_transform
@@ -312,7 +311,7 @@ export class Main extends Scene {
             //console.log(this.center_x[0], this.center_x[1], this.center_x[2])
         }
     }
-
+//center of human = center of the head
 class HumanFigure extends SceneGraph {
     constructor(material) {
         super(true, "Humanfigure", material)
@@ -334,7 +333,7 @@ class HumanFigure extends SceneGraph {
 
         this.leftArm.model_transform = this.model_transform.times(Mat4.translation(1.4, -2.2, 0))
                                                         .times(Mat4.scale(.4, 1, .3))
-                                                    //.times(Mat4.rotation(Math.PI/4, 0, 0, 1))
+                                                   
 
         this.rightArm.model_transform = this.model_transform.times(Mat4.translation(-1.4, -2.2, 0))
                                                         .times(Mat4.scale(.4, 1, .3))
@@ -353,7 +352,7 @@ class HumanFigure extends SceneGraph {
         this.initialRightLegTransform = this.rightLeg.model_transform.copy();
         this.initialHead = this.head.model_transform.copy()
         this.initialBody = this.body.model_transform.copy()
-        //this.initialCollide = this.collision_bound.model_transform.copy()
+
         this.addParts(this.head)
         this.addParts(this.leftArm)
         this.addParts(this.rightArm)
@@ -373,18 +372,9 @@ class HumanFigure extends SceneGraph {
         this.rightLeg.model_transform = this.initialRightArmTransform
         this.head.model_transform = this.initialHead
         this.body.model_transform = this.initialBody
-        //this.collision_bound.model_transform = this.initialCollide
     }
 
-   /*  get_pos() {
-        let transform = this.collision_bound.model_transform
-        let x = transform[0][3];
-        let y = transform[1][3];
-        let z = transform[2][3];
 
-        return { x, y, z };
-
-    } */
     update_bound () {
         if (this.fb == false) {
             this.bound = new BoundingBox(this.center_x[0],this.center_x[1],this.center_x[2],this.d,this.h,this.w)
@@ -404,17 +394,13 @@ class HumanFigure extends SceneGraph {
             for (let part of this.parts) {
                 part.model_transform = part.model_transform.times(transform);
             }
-        //this.collision_bound.model_transform =  this.model_transform.times(this.collision_bound.model_transform)
         this.reference.model_transform = this.model_transform
-        //this.collision_bound.model_transform =  this.model_transform
+   
 
     }
 
     draw(context, program_state, transform = Mat4.identity()) {
-        //super.draw(context, program_state, transform, this.material.override({texture:new Texture("assets/smile.jpg")}))
-        //let x, y ,z = this.get_pos()
-        //this.collision_bound.draw(context, program_state, this.collision_bound.model_transform, this.material)
-        //this.reference.draw(context, program_state, Mat4.identity().times(Mat4.translation(x, y, z)).times(Mat4.scale(3,3,3)), this.material)
+
         super.draw(context, program_state, transform, this.material.override({texture:new Texture("assets/smile.jpg")}))
     }
 
@@ -496,7 +482,7 @@ class Head extends SceneGraph {
 
 
 }
-
+//current center of soccerNet = center of rod1
 class soccerNet extends SceneGraph {
     constructor(material) {
         super(false, 'net', material)
@@ -594,7 +580,7 @@ class soccerNet extends SceneGraph {
         
     }
 }
-
+//current center of Block1 = center of rod1
 class Block1 extends SceneGraph {
     constructor(material) {
         super(false, "block1", material)
@@ -633,7 +619,7 @@ class Block1 extends SceneGraph {
         
     }
 }
-
+//center of chicken the center of the first chick
 class Chicken extends SceneGraph{
     constructor(material) {
         super(false, "group", material)
@@ -658,7 +644,7 @@ class Chicken extends SceneGraph{
 
 }
 
-
+//center of chick is center of head
 class Chick extends SceneGraph {
     constructor(material) {
         super(false, "chick", material)
@@ -749,14 +735,14 @@ class BoundingBox {
         this.depth = depth;
     }
 
-    // 检查与另一个盒子的碰撞
+    // check if intersects
     intersects(other) {
         //console.log(this.x + other.x, this.width/2 + other.width/2, this.z + other.z, this.depth/2+ other.depth/2)
         return ((Math.abs(this.x) + Math.abs(other.x) <= this.width/2 + other.width/2 &&
         Math.abs(this.z) + Math.abs(other.z) <= this.depth/2 + other.depth/2)
         )
     }}
-
+//this is the class for testing the collision
 class Te extends SceneGraph {
     constructor(material) {
         super(false, 'te', material)
