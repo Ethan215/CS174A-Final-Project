@@ -3,9 +3,12 @@ import {Body, Test_Data} from './examples/collisions-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
-const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon } = defs;
+const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, 
+        Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon } = defs;
 
-
+const backgroundMusic = new Audio('path/to/your/music/file.mp3');
+        backgroundMusic.loop = true;
+        backgroundMusic.play();
 
 export class Main extends Scene {
     /**
@@ -76,15 +79,20 @@ export class Main extends Scene {
         this.model_transform_back = this.model_transform_init.times(Mat4.rotation(Math.PI, 0, 1, 0))
 
 
-    
-
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
-    }
 
+
+        // background_music
+        this.backgroundMusic = new Audio('music/background_music.mp3');
+        this.backgroundMusic.loop = true;
+    }
     make_control_panel() {
         // Use the direction buttons to control the human figure
         // update the face to keep track of the current direction
         // Only rotate when the button is first clicked
+        this.key_triggered_button("Toggle Music", ["m"], () => {
+            this.toggleMusic();
+        });
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
             this.forward = true
@@ -163,7 +171,21 @@ export class Main extends Scene {
         });
 
     }
-    
+    // controal the background_music
+    playMusic() {
+        this.backgroundMusic.play().catch(e => console.error("Error playing music:", e));
+    }
+    pauseMusic() {
+        this.backgroundMusic.pause();
+    }
+    toggleMusic() {
+        if (this.backgroundMusic.paused) {
+            this.playMusic();
+        } else {
+            this.pauseMusic();
+        }
+    }
+
 
     move_human_figure(direction=1, shouldSwing, program_state) {
         let current_pos = this.shapes.human.return_pos();
