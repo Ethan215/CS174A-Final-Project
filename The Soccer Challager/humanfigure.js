@@ -41,13 +41,18 @@ export class Main extends Simulation {
                 color: hex_color("#edef00"),
                 ambient: .5, diffusivity: 1, specularity: .1,
                 texture: new Texture("assets/white.jpeg")
+            }),
+            ball_skin: new Material(new Textured_Phong(), {
+                color: hex_color("#ffffff"),
+                ambient: 0.48, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/ball.png")
             })
         }
         this.shapes = {
             tube: new Cylindrical_Tube(1, 20),
             human: new HumanFigure(this.materials.phong, Mat4.scale(.8, .8, .8).times(Mat4.translation(0, 1.875, 0))),
             ///1.4/.8
-            net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -15).times(Mat4.rotation(Math.PI, 0, 1, 0))),
+            net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -18).times(Mat4.rotation(Math.PI, 0, 1, 0))),
             poly: new Regular_2D_Polygon(4, 2),
             box: new Cube(),
             block: new Block1(this.materials.phong, Mat4.translation(-6, 3, -8)),
@@ -58,7 +63,8 @@ export class Main extends Simulation {
             test4: new Body(new Chicken(this.materials.blank), this.materials.blank, vec3(3.8,7.5,2)),
             test2: new Body(new HumanFigure(this.materials.phong), this.materials.phong, vec3(3.8,7.5,2)),
             test3: new Body(new Subdivision_Sphere(4), this.materials.phong, vec3(2, 2, 2)),
-            box2: new Te(this.materials.blank)
+            box2: new Te(this.materials.blank),
+            ball: new Soccer_ball(this.materials.ball_skin, Mat4.scale(0.8, 0.8, 0.8).times(Mat4.translation(0,1,16)))
 
 
         }
@@ -73,7 +79,7 @@ export class Main extends Simulation {
         this.agent_pos = vec3(0, -.25, 15)
         this.collision = false
         //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
-        this.items = [this.shapes.chick, this.shapes.net, this.shapes.block, this.shapes.chicken]
+        this.items = [this.shapes.chick, this.shapes.net, this.shapes.block, this.shapes.chicken, this.shapes.ball]
         this.face = "forward"
         this.agent_trans = Mat4.identity()
         this.agent_rot = vec4(0,0,0,0)
@@ -155,7 +161,7 @@ export class Main extends Simulation {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
              //Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(1, -5, -25));
+            program_state.set_camera(Mat4.translation(-4, -4, -30).times(Mat4.rotation(Math.PI/8,0,1,0)));
         }
 
 
@@ -270,6 +276,7 @@ export class Main extends Simulation {
         this.shapes.block.draw(context, program_state, Mat4.identity(), this.materials.phong.override({color: hex_color("#FFFF00")}))
         this.shapes.chick.draw(context, program_state, Mat4.identity(), this.materials.phong)
         this.shapes.chicken.draw(context,program_state,Mat4.identity(), this.materials.blank)
+        this.shapes.ball.draw(context, program_state, Mat4.identity(), this.materials.ball_skin)
 
     }
 }
@@ -747,6 +754,35 @@ class Chick extends SceneGraph {
     }
 }
 
+class Soccer_ball extends SceneGraph {
+    constructor(material, model_transform = Mat4.identity()) {
+        super(false, "soccer_ball", material, model_transform); 
+        this.ball = new SceneGraph(new defs.Subdivision_Sphere(4), "Ball", material)
+        this.transform = Mat4.identity()
+
+        this.basicArrange()
+        this.addParts(this.ball)
+        this.w = .6 //abs 
+        this.h = .6 // abs
+        this.d = .6
+        this.initial_center_x = [0, 0, 0]
+        this.center_x = [0, 0, 0]
+        this.change_pos(this.model_transform)
+
+        this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
+        
+    }
+    basicArrange() {
+        //this.ball.model_transform = this.model_transform.times(Mat4.scale( .5, .5, .5))
+                                                       // .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
+            
+        
+    }
+    draw(context, program_state, transform) {
+        super.draw(context, program_state, transform, this.material)
+    }
+}
+
 
 //盒子装的检测区域，需要球体的话可以增加sphere的碰撞检测
 class BoundingBox {
@@ -768,10 +804,17 @@ class BoundingBox {
         Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2))
     }
     close(other) {
-        return ((Math.abs(this.x + other.x) <= this.width/2 + other.width/2 + 0.2 &&
-        Math.abs(this.z + other.z) <= this.depth/2 + other.depth/2 + 0.2) && !this.intersects(other))
+        return ((Math.abs(this.x - other.x) <= this.width/2 - other.width/2 + 0.2 &&
+        Math.abs(this.z - other.z) <= this.depth/2 - other.depth/2 + 0.2) && !this.intersects(other))
     }
 }
+
+/* class BoundingShpere extends BoundingBox{
+    constructor(x, y, z, r) {
+        super(x, y, z, r, r, r) 
+    }
+    intersects
+} */
 
 class Te extends SceneGraph {
     constructor(material) {
@@ -790,4 +833,3 @@ class Te extends SceneGraph {
         
     }
 }
-
