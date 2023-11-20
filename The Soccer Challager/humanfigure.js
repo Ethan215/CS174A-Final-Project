@@ -8,7 +8,7 @@ const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere
 
 
 
-export class Main extends Scene {
+export class Main extends Simulation {
     /**
      *  **Base_scene** is a Scene that can be added to any display canvas.
      *  Setup the shapes, materials, camera, and lighting here.
@@ -45,13 +45,14 @@ export class Main extends Scene {
         }
         this.shapes = {
             tube: new Cylindrical_Tube(1, 20),
-            human: new HumanFigure(this.materials.phong, Mat4.scale(.8, .8, .8).times(Mat4.translation(0, 1.875/1.4/.8, 0))),
-            net: new soccerNet(this.materials.texture, Mat4.translation(12, 3, -5)),
+            human: new HumanFigure(this.materials.phong, Mat4.scale(.8, .8, .8).times(Mat4.translation(0, 1.875, 0))),
+            ///1.4/.8
+            net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -15).times(Mat4.rotation(Math.PI, 0, 1, 0))),
             poly: new Regular_2D_Polygon(4, 2),
             box: new Cube(),
             block: new Block1(this.materials.phong, Mat4.translation(-6, 3, -8)),
-            chick: new Chick(this.materials.blank, Mat4.translation(14, 1.8, 14)),
-            chicken:new Chicken(this.materials.blank),
+            chick: new Chick(this.materials.blank, Mat4.translation(-8, 1.8, 3)),
+            chicken:new Chicken(this.materials.blank, Mat4.translation(6 ,1.8, 5)),
             ground: new Regular_2D_Polygon(100,100),
             test: new Body(new Chick(this.materials.blank), this.materials.blank, vec3(3.8,7.5,2)),
             test4: new Body(new Chicken(this.materials.blank), this.materials.blank, vec3(3.8,7.5,2)),
@@ -61,26 +62,22 @@ export class Main extends Scene {
 
 
         }
+        this.backgroundMusic = new Audio('music/background_music.mp3');
+        this.backgroundMusic.loop = true;
+
         this.moving = false
-        this.forward = true
+        this.forward = false
         this.back = false
         this.left = false
         this.right = false
-        this.firstclick = true
+        this.agent_pos = vec3(0, -.25, 15)
+        this.collision = false
         //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
-        this.items = [this.shapes.chick, this.shapes.net, this.shapes.block]
+        this.items = [this.shapes.chick, this.shapes.net, this.shapes.block, this.shapes.chicken]
         this.face = "forward"
-
-        this.model_transform = Mat4.identity()
-        this.model_transform_init = Mat4.identity()
-        this.model_transform_left = this.model_transform_init.times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
-        this.model_transform_right = this.model_transform_init.times(Mat4.rotation(Math.PI/2, 0, 1, 0))
-        this.model_transform_back = this.model_transform_init.times(Mat4.rotation(Math.PI, 0, 1, 0))
-
-
-        // background_music
-        this.backgroundMusic = new Audio('music/background_music.mp3');
-        this.backgroundMusic.loop = true;
+        this.agent_trans = Mat4.identity()
+        this.agent_rot = vec4(0,0,0,0)
+        this.agent_size = 0.8
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
     }
@@ -92,26 +89,13 @@ export class Main extends Scene {
         this.key_triggered_button("Toggle Music", ["m"], () => {
             this.toggleMusic();
         });
-
-        // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
-            this.forward = true
-            console.log(this.face)
-
-            if (this.firstclick == true) {
-                if (this.face == "forward") {this.model_transform = this.model_transform_init}
-                if (this.face == "left") {this.model_transform = this.model_transform_left}
-                if (this.face == "right") {this.model_transform = this.model_transform_right}
-                if (this.face == "back") {this.model_transform = this.model_transform_back}
-                this.firstclick = false
-            }
-            this.face = "forward"  
+            this.forward = true 
             
         }, undefined, () => {
             this.moving = false
             this.forward = false
-            this.firstclick = true
         });
 
         // Move backward
@@ -119,62 +103,32 @@ export class Main extends Scene {
             this.moving = true
             this.back = true
   
-            if (this.firstclick == true) {
-                if (this.face == "forward") {this.model_transform = this.model_transform_back}
-                if (this.face == "right") {this.model_transform = this.model_transform_left}
-                if (this.face == "left") {this.model_transform = this.model_transform_right}
-                if (this.face == "back") {this.mdoel_transform = this.model_transform_init}
-            this.firstclick = false
-
-        this.face = "back"}
 
 
         }, undefined, () => {
             this.moving = false
             this.back = false
-            this.firstclick = true
         });
 
         this.key_triggered_button("Move Left", ["ArrowLeft"], () => {
             this.moving = true
             this.left = true
 
-            if (this.firstclick == true) {
-                if (this.face == "forward") {this.model_transform = this.model_transform_right}
-                if (this.face == "right") {this.model_transform = this.model_transform_back}
-                if (this.face == "back") {this.model_transform = this.model_transform_left}
-                if (this.face == "left") {this.mdoel_transform = this.model_transform_init}
-                this.firstclick = false
-            }
-            this.face = "left"
-
         }, undefined, () => {
             this.moving = false
             this.left = false
-            this.firstclick = true
         });
 
         this.key_triggered_button("Move Right", ["ArrowRight"], () => {
             this.moving = true
             this.right = true
 
-            if (this.firstclick == true) {
-                if (this.face == "forward") {this.model_transform = this.model_transform_left}
-                if (this.face == "left") {this.model_transform = this.model_transform_back}
-                if (this.face == "back") {this.model_transform = this.model_transform_right}
-                if (this.face == "right") {this.mdoel_transform = this.model_transform_init}
-                this.firstclick = false
-            }
-            
-            this.face = "right"
         }, undefined, () => {
             this.moving = false
             this.right = false
-            this.firstclick = true
         });
 
     }
-    // controal the background_music
     playMusic() {
         this.backgroundMusic.play().catch(e => console.error("Error playing music:", e));
     }
@@ -190,31 +144,18 @@ export class Main extends Scene {
     }
 
 
-    move_human_figure(direction=5, shouldSwing, program_state) {
-        let transform = this.model_transform
-    
-        this.model_transform = transform.times(Mat4.translation(0, 0,  this.dt*direction))
-        this. result = this.shapes.human.move(this.model_transform, this.items, this.face, this.last);
-        
-
-        if (shouldSwing) {
-            this.shapes.human.swingArm(program_state.animation_time / 900)
-            this.shapes.human.swingLeg(program_state.animation_time / 900)
-        }
-
-
-    }
-
     stop_human_figure() {
         this.moving = false
         this.shapes.human.stop_swin()
     }
+    
+    
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
              //Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(1, -2, -17));
+            program_state.set_camera(Mat4.translation(1, -5, -25));
         }
 
 
@@ -224,52 +165,111 @@ export class Main extends Scene {
         const light_position = vec4(10, 10, 10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        let t = program_state.animation_time / 1000
+        this.t = program_state.animation_time / 1000
         this.dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
 
         model_transform = model_transform.times(Mat4.scale(.4, .4, .4))
                                             .times (Mat4.rotation(Math.PI, 0, 1, 0))
                                             
-                                    
+        
+        let speed = 10.0
 
-        if (this.moving) { 
+        if (this.moving && ! this.collision) { 
+            let speed = 10.0;
+            this.shapes.human.swingArm(program_state.animation_time / 900)
+            this.shapes.human.swingLeg(program_state.animation_time / 900)
             if (this.forward) {
-                this.move_human_figure(10, true, program_state)
+                if(this.face != "forward")
+                {
+                    if (this.face == "left") {this.agent_rot[0] = this.agent_rot[0] - Math.PI/2;}
+                    if (this.face == "right") {this.agent_rot[0] = this.agent_rot[0] + Math.PI/2;}
+                    if (this.face == "backward") {this.agent_rot[0] = this.agent_rot[0] - Math.PI;}
                 
-                this.model_transform = this.model_transform_init
+                    this.face = "forward";
+                }
+                this.agent_pos[2] -= this.dt * speed;
+               
+    
             }
-            else if (this.back) {
-                this.move_human_figure(10, true, program_state)
-                this.model_transform = this.model_transform_init
+            if (this.back) {
+                
+                if(this.face != "backward")
+                {
+                    
+                    if (this.face == "left") {this.agent_rot[0] = this.agent_rot[0] + Math.PI/2;}
+                    if (this.face == "right") {this.agent_rot[0] = this.agent_rot[0] - Math.PI/2;}
+                    if (this.face == "forward") {this.agent_rot[0] = this.agent_rot[0] - Math.PI;}
+                    
+                    this.face = "backward";
+                }
+                this.agent_pos[2] += this.dt * speed;
+              
             }
-            else if (this.left) {
-                this.move_human_figure(10, true, program_state)
-                this.model_transform = this.model_transform_init
+            if (this.left) {
+                
+                if(this.face != "left")
+                {
+                    if (this.face == "backward") {this.agent_rot[0] = this.agent_rot[0] - Math.PI/2;}
+                    if (this.face == "right") {this.agent_rot[0] = this.agent_rot[0] - Math.PI;}
+                    if (this.face == "forward") {this.agent_rot[0] = this.agent_rot[0] + Math.PI/2;}
+    
+                    this.face = "left";
+                }
+                this.agent_pos[0] -= this.dt * speed;
+                
             }
-            else if (this.right) {
-                this.move_human_figure(10, true, program_state)
-                this.model_transform = this.model_transform_init
+            if (this.right) {
+                
+                if(this.face != "right")
+                {
+                   
+                    if (this.face == "backward") {this.agent_rot[0] = this.agent_rot[0] + Math.PI/2;}
+                    if (this.face == "left") {this.agent_rot[0] = this.agent_rot[0] + Math.PI;}
+                    if (this.face == "forward") {this.agent_rot[0] = this.agent_rot[0] - Math.PI/2;}
+                    
+                    this.face = "right";
+                }
+                this.agent_pos[0] += this.dt * speed;
+                
             }
-            
         }
 
-        else {
+
+        else if (this.collision) {
+            if (this.face == "forward"){this.agent_pos[2] += .2}
+            if (this.face == "backward") {this.agent_pos[2] -= .2}
+            if (this.face == "left") {this.agent_pos[0] += .2}
+            if (this.face == "right") {this.agent_pos[0] -= .2}
             this.stop_human_figure()
             
         }
-
-
-
-
+        else{this.stop_human_figure()}
+        this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2]).times(Mat4.rotation(this.agent_rot[0],0,1,0)).
+            times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
     
-        this.shapes.human.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI, 0, 1, 0)), this.materials.phong)
+        this.shapes.human.center_x[0] = this.agent_pos[0]
+        this.shapes.human.center_x[1] = this.agent_pos[1]
+        this.shapes.human.center_x[2] = this.agent_pos[2]
+        this.shapes.human.update_bound()
+
+        this.shapes.human.draw(context, program_state, this.agent_trans)
+
+        const check = (element) => this.shapes.human.bound.intersects(element.bound) == true
+        if (this.items.some(check)){
+            this.collision = true}
+        else {
+        this.collision = false
+        }
+    
+ 
+  
         this.shapes.net.draw(context,program_state,Mat4.identity(),this.materials.texture)
         this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 30)), this.materials.sky)
         this.shapes.ground.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.scale(50, 50, 50)), this.materials.blank.override({color:hex_color("82ec3c")}))
         this.shapes.block.draw(context, program_state, Mat4.identity(), this.materials.phong.override({color: hex_color("#FFFF00")}))
         this.shapes.chick.draw(context, program_state, Mat4.identity(), this.materials.phong)
-        this.shapes.chicken.draw(context,program_state,Mat4.translation(-4,1,-5), this.materials.blank)
+        this.shapes.chicken.draw(context,program_state,Mat4.identity(), this.materials.blank)
 
     }
 }
@@ -322,8 +322,6 @@ export class Main extends Scene {
             this.center_x[0] = this.initial_center_x[0] +this.model_transform[0][3]
             this.center_x[1] = this.initial_center_x[1] +this.model_transform[1][3]
             this.center_x[2] = this.initial_center_x[2] +this.model_transform[2][3]
-
-            //console.log(this.center_x[0], this.center_x[1], this.center_x[2])
         }
     }
 
@@ -337,16 +335,16 @@ class HumanFigure extends SceneGraph {
         this.leftLeg = new SceneGraph(new Cube(), "LeftLeg", material)
         this.rightLeg = new SceneGraph(new Cube(), "RightLeg", material)
         this.fb = true
-        this.w = 3.6 * .8 //abs 
+        this.w = 3 * .8 //abs 
         this.h = 7.5 *.8// abs
-        this.d = 3.6 *.8
+        this.d = 3 *.8
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
         this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
         
 
-        this.head.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0))
+        this.head.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0)).times(Mat4.rotation(Math.PI, 1, 0, 0))
         this.leftArm.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0))
                                                         .times(Mat4.translation(1.4, -2.2, 0))
                                                         .times(Mat4.scale(.4, 1, .3))
@@ -394,47 +392,10 @@ class HumanFigure extends SceneGraph {
 
  
     update_bound () {
-        if (this.fb == false) {
-            this.bound = new BoundingBox(this.center_x[0],this.center_x[1],this.center_x[2],this.d,this.h,this.w)
-        }
-        else {
-            this.bound = new BoundingBox(this.center_x[0],this.center_x[1],this.center_x[2],this.w,this.h,this.d)
-        }
+        super.update_bound()
     }
     
 
-    move(transform, list, face, last,count=10) {
-        
-        let distanceß
-        let temp = transform
-        this.update()
-        this.update_pos()
-        this.update_bound()
-
-        for(let i of list) {
-            
-            if (this.bound.intersects(i.bound)) {
-
-                this.model_transform = this.model_transform.times(Mat4.translation(0,0,-.2));
-            for (let part of this.parts) {
-                part.model_transform = part.model_transform.times(Mat4.translation(0,0,-.2));
-            }
-            
-
-       }
-    }
-        if (count!=0) {
-        this.model_transform = this.model_transform.times(transform);
-        console.log('x')
-            for (let part of this.parts) {
-                part.model_transform = part.model_transform.times(transform);
-            }
-        }
-        
-            
-     
-
-    }
 
     draw(context, program_state, transform = Mat4.identity()) {
         
@@ -538,7 +499,7 @@ class soccerNet extends SceneGraph {
         this.reference = new Cube()
         this.w = 12.6 //abs 
         this.h = 6.6 // abs
-        this.d = 8.6
+        this.d = 7
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
@@ -631,9 +592,10 @@ class Block1 extends SceneGraph {
         this.rod2 = new SceneGraph(new Capped_Cylinder(5, 100), "rod21",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
         this.face1 = new SceneGraph(new Cube(), "face1", material)
         this.face2 = new SceneGraph(new Cube(), "face2", material)
-        this.w = 10.6 //abs 
+        this.w = 9.2
+        //10.6 //abs 
         this.h = 6 // abs
-        this.d = 1
+        this.d = .2
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
@@ -675,16 +637,23 @@ class Chicken extends SceneGraph{
         this.first = new Chick(material)
         this.second = new Chick(material)
         this.third = new Chick(material)
-
+        this.w = 10.4//abs 
+        this.h = 3.6 // abs
+        this.d = 1.8
+        this.initial_center_x = [0, 0, 0]
+        this.center_x = [0, 0, 0]
+        this.change_pos(this.model_transform)
+    
+        this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
         this.basicArrange()
         this.addParts(this.first)
         this.addParts(this.second)
         this.addParts(this.third)
     }
     basicArrange() {
-        this.first.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.scale(.3, .3, .3)).times(Mat4.translation(-9/.3, -.45/.3, -4/.3))
-        this.second.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.scale(.3, .3, .3)).times(Mat4.translation(-9/.3, -.45/.3, -2.5/.3))
-        this.third.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.scale(.3, .3, .3)).times(Mat4.translation(-9/.3, -.45/.3, -1/.3))
+        this.first.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, -4))
+        this.second.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, 0))
+        this.third.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, 4))
 
     }
     draw(context, program_state, transform) {
@@ -712,13 +681,13 @@ class Chick extends SceneGraph {
         this.leg2= new SceneGraph(new Cube(), "mouse", material)
         this.feet1= new SceneGraph(new Cube(), "mouse", material.override({color: hex_color ('#C96303')}))
         this.feet2= new SceneGraph(new Cube(), "mouse", material.override({color: hex_color ('#C96303')}))
-        this.w = 2 //abs 
+        this.w = 1.2 //abs 
         this.h = 3.6 // abs
-        this.d = 4
+        this.d = 3
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
-        console.log(this.center_x)
+
         this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
 
         this.basicArrange()
@@ -793,13 +762,10 @@ class BoundingBox {
 
     // 检查与另一个盒子的碰撞
     intersects(other) {
-        //console.log(this.x + other.x, this.width/2 + other.width/2, this.z + other.z, this.depth/2+ other.depth/2)
-        //console.log((Math.abs(this.x) + Math.abs(other.x) <= this.width/2 + other.width/2 &&
-        //Math.abs(this.z) + Math.abs(other.z) <= this.depth/2 + other.depth/2))
-        /* return ((Math.abs(this.x) + Math.abs(other.x) <= this.width/2 + other.width/2 &&
-        Math.abs(this.z) + Math.abs(other.z) <= this.depth/2 + other.depth/2)) */
-        return ((Math.abs(this.x + other.x) +.1 <= this.width/2 + other.width/2 &&
-        Math.abs(this.z + other.z) +.1 <= this.depth/2 + other.depth/2))
+        //console.log(Math.abs(this.x + other.x), Math.abs(this.width/2 + other.width/2), Math.abs(this.z + other.z), Math.abs(this.depth/2+ other.depth/2))
+        
+        return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 &&
+        Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2))
     }
     close(other) {
         return ((Math.abs(this.x + other.x) <= this.width/2 + other.width/2 + 0.2 &&
