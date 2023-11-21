@@ -49,8 +49,8 @@ export class Main extends Simulation {
             }),
             grass: new Material(new Textured_Phong(), {
                 color: hex_color("#00FF00"), // 绿色草地
-                ambient: 0.3, diffusivity: 0.5, specularity: 0.1,
-                texture: new Texture("assets/grass.jpg","LINEAR")
+                ambient: 0.4, diffusivity: 0.5, specularity: 0.1,
+                texture: new Texture("assets/grass.jpg", "LINEAR")
 
             })
  
@@ -186,9 +186,11 @@ export class Main extends Simulation {
         this.t = program_state.animation_time / 1000
         this.dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
-
-        model_transform = model_transform.times(Mat4.scale(.4, .4, .4))
-                                            .times (Mat4.rotation(Math.PI, 0, 1, 0))
+        
+        //grass update
+        for (let i = 0; i < this.shapes.field.arrays.texture_coord.length; ++i) {
+            this.shapes.field.arrays.texture_coord[i].scale_by(12)
+        } 
                                             
         
         let speed = 10.0
@@ -286,14 +288,14 @@ export class Main extends Simulation {
         let field_transform = Mat4.identity()
                         .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
                         .times(Mat4.scale(50, 50, 50)); // Scale to the size of a soccer field
-        this.shapes.field.draw(context, program_state, field_transform, this.materials.grass);
+        this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
         
         // this.shapes.ground.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.scale(50, 50, 50)), this.materials.blank.override({color:hex_color("82ec3c")}))
         this.shapes.net.draw(context,program_state,Mat4.identity(),this.materials.texture)
         // box 是表示四周的环境，我们可以改成其他的景色
         this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 30)), this.materials.sky)
         // block 是表示障碍物的一种
-        this.shapes.block.draw(context, program_state, Mat4.identity(), this.materials.phong.override({color: hex_color("#FFFF00")}))
+        this.shapes.block.draw(context, program_state, Mat4.identity(), this.materials.phong.override({color: hex_color("#00994d")}))
         // 单只小鸡
         this.shapes.chick.draw(context, program_state, Mat4.identity(), this.materials.phong)
         // 三只小鸡
