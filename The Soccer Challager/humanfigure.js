@@ -4,7 +4,7 @@ import { Simulation } from './examples/control-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
-const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon } = defs;
+const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon, Closed_Cone } = defs;
 
 
 
@@ -21,6 +21,11 @@ export class Main extends Simulation {
                 color: hex_color("#A1B8D6"),
                 ambient: .52, diffusivity: .1, specularity: 0.1,
                 texture: new Texture("assets/blue.png")
+            }),
+            block2: new Material(new Textured_Phong(), {
+                color: hex_color("#ff745e"),
+                ambient: .6, diffusivity: .1, specularity: 0.5,
+                texture: new Texture("assets/block.jpg")
             }),
             texture: new Material(new Textured_Phong(), {
                 color: hex_color("#ffffff"),
@@ -59,18 +64,18 @@ export class Main extends Simulation {
             tube: new Cylindrical_Tube(1, 20),
             human: new HumanFigure(this.materials.phong, Mat4.scale(.8, .8, .8).times(Mat4.translation(0, 1.875, 0))),
             ///1.4/.8
-            net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -18).times(Mat4.rotation(Math.PI, 0, 1, 0))),
+            net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -30).times(Mat4.rotation(Math.PI, 0, 1, 0))),
             poly: new Regular_2D_Polygon(4, 2),
             box: new Cube(),
             block: new Block1(this.materials.phong, Mat4.translation(-6, 3, -8)),
             chick: new Chick(this.materials.blank, Mat4.translation(-8, 1.8, 3)),
-            chicken:new Chicken(this.materials.blank, Mat4.translation(6 ,1.8, 5)),
+            chicken:new Chicken(this.materials.blank, Mat4.translation(0 ,1.8, 0)),
             test: new Body(new Chick(this.materials.blank), this.materials.blank, vec3(3.8,7.5,2)),
             test4: new Body(new Chicken(this.materials.blank), this.materials.blank, vec3(3.8,7.5,2)),
             test2: new Body(new HumanFigure(this.materials.phong), this.materials.phong, vec3(3.8,7.5,2)),
             test3: new Body(new Subdivision_Sphere(4), this.materials.phong, vec3(2, 2, 2)),
             box2: new Te(this.materials.blank),
-
+            block2: new Block2(this.materials.block2, Mat4.identity().times(Mat4.translation(0, 0.5+0.35, 0))),
             // ground: new Regular_2D_Polygon(100,100),
             // soccer field
             field: new Regular_2D_Polygon(100, 100), // 4个顶点，1表示矩形
@@ -80,22 +85,59 @@ export class Main extends Simulation {
         
         this.backgroundMusic = new Audio('music/background_music.mp3');
         this.backgroundMusic.loop = true;
+        
 
         this.moving = false
         this.forward = false
         this.back = false
         this.left = false
         this.right = false
-        this.agent_pos = vec3(0, -.25, 15)  
+        this.agent_pos = vec3(0, -.25, 30)  
         this.collision = false
+        this.direction = 1
+        this.first = false
         //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
-        this.items = [this.shapes.chick, this.shapes.net, this.shapes.block, this.shapes.chicken, this.shapes.ball]
+        
+        //初始化障碍物位置，球网位置固定，鸡群只刷一只
+        this.still_items = [this.shapes.net, this.shapes.chicken]
+        //随机刷新的障碍物的种类
+        this.types = ["block1", "chick", "block2"]
+        //可调整： 随机生成障碍物的位置
+        this.areas = [[Math.random() * (-11+21) -21, Math.random() * (20-10) +10], 
+                        [Math.random() * (-11+21) -21, Math.random() * (-10+20) -20],
+                        [Math.random() * (-11+21) -21, Math.random() * (5+5) -5], 
+                        [Math.random() * (5+5) -5, Math.random() * (20-10) +10],
+                        [Math.random() * (5+5) -5, Math.random() * (-10+20) - 20],
+                        [Math.random() * (5+5) -5, Math.random() * (5+5) -5],
+                        [Math.random() * (21-11) +11, Math.random() * (20-10) +10], 
+                        [Math.random() * (21-11) +11, Math.random() * (-10+20) - 20],
+                        [Math.random() * (21-11) +11, Math.random() * (5+5) -5]]
+        //随机鸡群位置
+        let random = Math.floor(Math.random() * (5-0) + 0)
+        this.chicken_pos = this.areas[random]
+
+        //必须保证鸡群刷新位置在bound最左侧，不然会发生障碍物之间的碰撞
+        let counter = this.chicken_pos[0]
+        if (counter <= -11) {counter = -21}
+        else if (counter <= 5) {counter = -5}
+        else {counter = 11}
+        this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.translation(counter, 0, this.chicken_pos[1])) 
+
+        //位置列表中去除鸡群位置
+        this.areas.splice(random, 1)
         this.face = "forward" 
         this.agent_trans = Mat4.identity() // store the character's translation value
         this.agent_rot = vec4(0,0,0,0)   // store the character's rotation state 
         this.agent_size = 0.8      // scale
-
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.length = 10
+        this.temp = this.length
+        this.chicken_direction = true
+    
+        //random_refresh: 填充this.still_items 列表，随机位置，随机物件
+        for (let i of this.areas) {
+            this.random_refresh(i)
+        }
+        
     }
 
  
@@ -105,6 +147,14 @@ export class Main extends Simulation {
         this.key_triggered_button("Toggle Music", ["m"], () => {
             this.toggleMusic();
         });
+
+        this.key_triggered_button("First Perspective", ["f"], () => {
+            this.first = true
+        });
+        this.key_triggered_button("Third Perspective", ["t"], () => {
+            this.first = false
+        });
+        
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
             this.forward = true 
@@ -113,6 +163,8 @@ export class Main extends Simulation {
             this.moving = false
             this.forward = false
         });
+
+        
 
         // Move backward
         this.key_triggered_button("Move Backward", ["ArrowDown"], () => {
@@ -167,15 +219,46 @@ export class Main extends Simulation {
         this.shapes.human.stop_swin()
     }
     
+    //random_refresh: refresh the blocks in the given area
+    random_refresh(area, type=this.types[Math.floor(Math.random()*this.types.length)]) {
+        if (type == "block1")
+        this.still_items.push(new Block1(this.materials.phong, Mat4.scale(.7,.7,.7).times(Mat4.translation(area[0], 3, area[1]))))
+        if (type == "chick")
+        this.still_items.push(new Chick(this.materials.blank, Mat4.translation(area[0], 1.8, area[1])))
+        if (type == "block2")
+        this.still_items.push(new Block2(this.materials.block2, Mat4.translation(area[0], 0.85, area[1])))
+ 
+        
+    }
+
+    //鸡群移动，length = 10
+    move_chicken(chicken, dt=this.dt) {
+        let speed = 10
+        let temp = dt*speed
+            chicken.update_pos()
+            chicken.update_bound()
+            chicken.wobble(this.t, this.direction)
+            
+            if (this.chicken_direction) {
+            chicken.model_transform[0][3] = chicken.model_transform[0][3] + temp
+            }
+            
+            else {
+                chicken.model_transform[0][3] = chicken.model_transform[0][3] - temp}
+
+            return temp
+    
+
+    }
     
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-             //Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(-4, -4, -30).times(Mat4.rotation(Math.PI/8,0,1,0)));
+            program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)));
         }
 
+        
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
@@ -183,22 +266,21 @@ export class Main extends Simulation {
         const light_position = vec4(10, 10, 10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        this.t = program_state.animation_time / 1000
+        this.t = program_state.animation_time / 1000;
         this.dt = program_state.animation_delta_time / 1000;
-        let model_transform = Mat4.identity();
         
         //grass update
         for (let i = 0; i < this.shapes.field.arrays.texture_coord.length; ++i) {
             this.shapes.field.arrays.texture_coord[i].scale_by(12)
         } 
-                                            
+                                                    
         
         let speed = 10.0
 
         if (this.moving && ! this.collision) { 
             let speed = 10.0;
-            this.shapes.human.swingArm(program_state.animation_time / 900)  // Changing the swing time
-            this.shapes.human.swingLeg(program_state.animation_time / 900)
+            this.shapes.human.swingArm(program_state.animation_time / 300)  // Changing the swing time
+            this.shapes.human.swingLeg(program_state.animation_time / 300)
             if (this.forward) {
                 if(this.face != "forward")
                 {
@@ -279,30 +361,44 @@ export class Main extends Simulation {
             this.shapes.human.draw(context, program_state, this.agent_trans)
 
             const check = (element) => this.shapes.human.bound.intersects(element.bound) == true
-        if (this.items.some(check)){
-            this.collision = true}
+            
+        if (this.still_items.some(check)) {
+            this.collision = true
+        }
         else {
             this.collision = false
         }
     
         let field_transform = Mat4.identity()
                         .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
-                        .times(Mat4.scale(50, 50, 50)); // Scale to the size of a soccer field
+                        .times(Mat4.scale(80, 80, 80)); // Scale to the size of a soccer field
         this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
         
-        // this.shapes.ground.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/2, 1, 0, 0)).times(Mat4.scale(50, 50, 50)), this.materials.blank.override({color:hex_color("82ec3c")}))
-        this.shapes.net.draw(context,program_state,Mat4.identity(),this.materials.texture)
         // box 是表示四周的环境，我们可以改成其他的景色
-        this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 30)), this.materials.sky)
-        // block 是表示障碍物的一种
-        this.shapes.block.draw(context, program_state, Mat4.identity(), this.materials.phong.override({color: hex_color("#00994d")}))
-        // 单只小鸡
-        this.shapes.chick.draw(context, program_state, Mat4.identity(), this.materials.phong)
-        // 三只小鸡
-        this.shapes.chicken.draw(context,program_state,Mat4.identity(), this.materials.blank)
+        this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 40)), this.materials.sky)
+
+        //移动鸡，到距离转方向转面
+        this.temp -= this.move_chicken(this.shapes.chicken)
+        if (this.temp <= 0) {
+            this.chicken_direction = !this.chicken_direction
+            this.direction = - this.direction
+            this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0))
+            this.temp = this.length
+        }
+
+        //视角转换， this.first == true: 第一人称
+        if (this.first) {
+            console.log(this.agent_trans)
+        program_state.camera_inverse = Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2]).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
+        else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
+
+        //画障碍物
+        for (let i of this.still_items) {
+            i.draw(context, program_state, Mat4.identity(), this.materials.phong)
+        } 
+
         
-        this.shapes.ball.draw(context, program_state, Mat4.identity(), this.materials.ball_skin)
-    }
+    } 
 }
 
     class SceneGraph{
@@ -339,9 +435,9 @@ export class Main extends Simulation {
 
         }
         change_pos(transform) {
-            this.initial_center_x[0] = this.model_transform[0][3]
+            /* this.initial_center_x[0] = this.model_transform[0][3]
             this.initial_center_x[1] = this.model_transform[1][3]
-            this.initial_center_x[2] = this.model_transform[2][3]
+            this.initial_center_x[2] = this.model_transform[2][3] */
             this.center_x[0] = this.model_transform[0][3]
             this.center_x[1] =this.model_transform[1][3]
             this.center_x[2] =this.model_transform[2][3]
@@ -620,10 +716,10 @@ class Block1 extends SceneGraph {
         this.rod2 = new SceneGraph(new Capped_Cylinder(5, 100), "rod21",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
         this.face1 = new SceneGraph(new Cube(), "face1", material)
         this.face2 = new SceneGraph(new Cube(), "face2", material)
-        this.w = 9.2
+        this.w = 9.2 * .7
         //10.6 //abs 
-        this.h = 6 // abs
-        this.d = .2
+        this.h = 6  * .7// abs
+        this.d = .2 * .7
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
@@ -655,7 +751,8 @@ class Block1 extends SceneGraph {
                                     .times(Mat4.rotation(-Math.PI/12, 0, 0, 1))
                                     .times(Mat4.scale(5/0.96,0.5,0.01))
                                     .times(Mat4.rotation(Math.PI/128, 0, 0, 1))
-                                    .times(Mat4.translation(1, 3/0.8, -1))                                           
+                                    .times(Mat4.translation(1, 3/0.8, -1))
+                                                                               
 
     }
     draw(context, program_state, transform) {
@@ -670,25 +767,46 @@ class Chicken extends SceneGraph{
         this.first = new Chick(material)
         this.second = new Chick(material)
         this.third = new Chick(material)
-        this.w = 10.4//abs 
+        this.w = 10.3//abs 
         this.h = 3.6 // abs
         this.d = 1.8
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
+        //console.log(this.center_x)
     
         this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
         this.basicArrange()
         this.addParts(this.first)
         this.addParts(this.second)
         this.addParts(this.third)
+
     }
     basicArrange() {
         this.first.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, -4))
         this.second.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, 0))
         this.third.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 0, 1, 0)).times(Mat4.translation(0, 0, 4))
+        this.first.initial_model_transform = this.first.model_transform
+        this.second.initial_model_transform = this.second.model_transform
+        this.third.initial_model_transform = this.third.model_transform
 
     }
+    
+    //走路的时候扭屁股
+     wobble(time, direction = 1) {
+        let angle = direction * Math.sin(4*time) * Math.PI /10
+        this.first.model_transform = this.first.initial_model_transform .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
+                                                                            .times(Mat4.rotation(angle, 0, 1, 0))
+                                                                            .times(Mat4.rotation(Math.PI/2, 0, 1, 0))
+        this.second.model_transform = this.second.initial_model_transform .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
+                                                                            .times(Mat4.rotation(angle, 0, 1, 0))
+                                                                            .times(Mat4.rotation(Math.PI/2, 0, 1, 0))
+        this.third.model_transform = this.third.initial_model_transform .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
+                                                                            .times(Mat4.rotation(angle, 0, 1, 0))
+                                                                            .times(Mat4.rotation(Math.PI/2, 0, 1, 0))
+        
+
+    } 
     draw(context, program_state, transform) {
         super.draw(context, program_state, transform, this.material)
     }
@@ -824,7 +942,7 @@ class BoundingBox {
     // 检查与另一个盒子的碰撞
     intersects(other) {
         //console.log(Math.abs(this.x + other.x), Math.abs(this.width/2 + other.width/2), Math.abs(this.z + other.z), Math.abs(this.depth/2+ other.depth/2))
-        
+        //console.log(other.x, other.z)
         return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 &&
         Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2))
     }
@@ -834,12 +952,7 @@ class BoundingBox {
     }
 }
 
-/* class BoundingShpere extends BoundingBox{
-    constructor(x, y, z, r) {
-        super(x, y, z, r, r, r) 
-    }
-    intersects
-} */
+
 
 class Te extends SceneGraph {
     constructor(material) {
@@ -852,6 +965,36 @@ class Te extends SceneGraph {
         this.c.model_transform - Mat4.identity()
         this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
         
+    }
+    draw(context, program_state, transform) {
+        super.draw(context, program_state, transform, this.material)
+        
+    }
+}
+
+
+class Block2 extends SceneGraph {
+    constructor(material, model_transform){
+        super(false, 'block2', material, model_transform)
+        this.main = new SceneGraph(new Closed_Cone(100, 100), "main", material)
+        this.plate = new SceneGraph(new Torus(100, 100), "plate", material) 
+        this.basicArrange()
+        this.addParts(this.main)
+        this.addParts(this.plate)
+        this.w = 1 //abs 
+        this.h = 1.5 // abs
+        this.d = 1
+        this.initial_center_x = [0, 0, 0]
+        this.center_x = [0, 0, 0]
+        this.change_pos(this.model_transform)
+        this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
+        for (let i = 0; i < this.main.geometry.arrays.texture_coord.length; ++i) {
+            this.main.geometry.arrays.texture_coord[i].scale_by(1/100)
+        } 
+    }
+    basicArrange() {
+        this.main.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, -1, 0, 0).times(Mat4.scale(1, 1, 1.5))).times(Mat4.translation(0, 0, .5))
+        this.plate.model_transform = Mat4.identity().times(Mat4.rotation(Math.PI/2, 1, 0, 0).times(Mat4.scale(1.5, 1.5, .3))).times(Mat4.translation(0, 0, .8/.3))
     }
     draw(context, program_state, transform) {
         super.draw(context, program_state, transform, this.material)
