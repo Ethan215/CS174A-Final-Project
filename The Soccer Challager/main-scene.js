@@ -44,8 +44,8 @@ Object.assign(defs,
 
 // (Can define Main_Scene's class here)
 
-// const Main_Scene = Control_Demo;
-// const Main_Scene = Mouse_Demo;
+ //const Main_Scene = Control_Demo;
+//const Main_Scene = Mouse_Demo;
 const Main_Scene = Main;
 const Additional_Scenes = [];
 
