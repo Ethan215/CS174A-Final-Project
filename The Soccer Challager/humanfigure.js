@@ -42,7 +42,7 @@ export class Main extends Simulation {
             sky: new Material(new Textured_Phong(), {
                 color: hex_color("#A1B8D6"),
                 ambient: .5, diffusivity:.1, specularity: 0.1,
-                texture: new Texture("assets/sky.png"),
+                texture: new Texture("assets/sky2.png"),
             }),
             blank: new Material(new Textured_Phong(), {
                 color: hex_color("#edef00"),
@@ -69,6 +69,7 @@ export class Main extends Simulation {
             net: new soccerNet(this.materials.texture, Mat4.translation(0, 3, -30).times(Mat4.rotation(Math.PI, 0, 1, 0))),
             poly: new Regular_2D_Polygon(4, 2),
             box: new Cube(),
+            sphere: new Subdivision_Sphere(4),
             block: new Block1(this.materials.phong, Mat4.translation(-6, 3, -8)),
             chick: new Chick(this.materials.blank, Mat4.translation(-8, 1.8, 3)),
             chicken:new Chicken(this.materials.blank, Mat4.translation(0 ,1.8, 0)),
@@ -332,7 +333,7 @@ export class Main extends Simulation {
         
 
         program_state.projection_transform = Mat4.perspective(
-            Math.PI / 4, context.width / context.height, 1, 100);
+            Math.PI / 4, context.width / context.height, 1, 1000);
 
         const light_position = vec4(10, 10, 10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
@@ -467,7 +468,7 @@ export class Main extends Simulation {
         this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
         
         // box 是表示四周的环境，我们可以改成其他的景色
-        this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 40)), this.materials.sky)
+        this.shapes.sphere.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/1.5, 0,1,0)).times(Mat4.scale(80, 80, 80)), this.materials.sky)
 
         
         this.kicking_ball(this.shapes.ball)
