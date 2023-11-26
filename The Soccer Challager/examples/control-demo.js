@@ -129,16 +129,39 @@ export class Control_Demo extends Simulation {
                 .emplace(Mat4.translation(...vec3(0, 15, 0).randomized(10)),
                     vec3(0, -1, 0).randomized(2).normalized().times(3), Math.random()));
 
+        // for (let b of this.bodies) {
+        //     // Gravity on Earth, where 1 unit in world space = 1 meter:
+        //     b.linear_velocity[1] += dt * -9.8;
+        //     // If about to fall through floor, reverse y velocity:
+        //     if (b.center[1] < -8 && b.linear_velocity[1] < 0)
+        //         b.linear_velocity[1] *= -.8;
+        //     // Simple Sphere Collision Implementation
+        //     let dis = b.center.minus(this.agent_pos);
+        //     if (dis.norm() < this.agent_size) {
+        //         b.linear_velocity.add_by(dis.times(dt * 98));
+        //     }
+        // }
         for (let b of this.bodies) {
             // Gravity on Earth, where 1 unit in world space = 1 meter:
             b.linear_velocity[1] += dt * -9.8;
             // If about to fall through floor, reverse y velocity:
             if (b.center[1] < -8 && b.linear_velocity[1] < 0)
-                b.linear_velocity[1] *= -.8;
+            {
+                b.linear_velocity[1] = (b.linear_velocity[1] * -.8) - 4;
+                b.linear_velocity[0] = (b.linear_velocity[0] * .8);
+                b.linear_velocity[2] = (b.linear_velocity[2] * .8);
+                if(b.linear_velocity.norm() < 5 )
+                    b.linear_velocity = vec3(0, 0, 0);
+            }
+                
+                
             // Simple Sphere Collision Implementation
             let dis = b.center.minus(this.agent_pos);
             if (dis.norm() < this.agent_size) {
-                b.linear_velocity.add_by(dis.times(dt * 98));
+                
+                b.linear_velocity.add_by(dis.times(dt * 25));
+            
+                
             }
         }
 

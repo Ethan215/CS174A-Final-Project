@@ -1,6 +1,6 @@
 import {defs, tiny} from './examples/common.js';
-import {Body, Test_Data} from './examples/collisions-demo.js';
-import { Simulation } from './examples/control-demo.js';
+import {Body, Simulation, Test_Data} from './examples/collisions-demo.js';
+//import { Simulation } from './examples/control-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
@@ -15,6 +15,8 @@ export class Main extends Simulation {
      */
     constructor() {
         super();
+        
+        
 
         this.materials = {
             phong: new Material(new Textured_Phong(), {
@@ -79,10 +81,11 @@ export class Main extends Simulation {
             // ground: new Regular_2D_Polygon(100,100),
             // soccer field
             field: new Regular_2D_Polygon(100, 100), // 4个顶点，1表示矩形
-            ball: new Soccer_ball(this.materials.ball_skin, Mat4.scale(0.8, 0.8, 0.8).times(Mat4.translation(0,1,16)))
+            ball: new Soccer_ball(this.materials.ball_skin, Mat4.scale(0.7, 0.7, 0.7))
 
         }
         
+        this.shapes.field.bound = new BoundingBox(0,0,0,100,1,100);
         this.backgroundMusic = new Audio('music/background_music.mp3');
         this.backgroundMusic.loop = true;
         
@@ -92,10 +95,24 @@ export class Main extends Simulation {
         this.back = false
         this.left = false
         this.right = false
+
+        this.agent_pos = vec3(0, -.25, 30)
+        this.ball_pos = vec3(0,0.7,29)  
+        this.collision = false
+        this.direction = 1
+        this.first = false
+        this.kick = false
+        this.time = 0
+        this.spin_angle = Math.PI
+        this.linear_velocity_yz = vec3(0,0,0)
+        this.initial_camera_location = Mat4.look_at(vec3(-15, 8, 40), vec3(5, 0, 0), vec3(0, 5, 0));
+        this.ball_collision = false
+
         this.agent_pos = vec3(0, -.25, 30)  
         this.collision = false
         this.direction = 1
         this.first = false
+
         //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
         
         //初始化障碍物位置，球网位置固定，鸡群只刷一只
@@ -196,6 +213,12 @@ export class Main extends Simulation {
             this.right = false
         });
 
+        this.key_triggered_button("Kick", ["k"], () =>{
+            this.kick = true
+            this.time = 0
+            this.spin_angle = Math.PI
+        })
+
     }
 
     // For key_triggered_button 'm' controal music
@@ -250,7 +273,67 @@ export class Main extends Simulation {
     
 
     }
+
+
+    find_reflecting_dir(initial_pos)
+    {
+        let direction = this.ball_pos.minus(initial_pos)
+        return direction.times(-1)
+    }
+    kicking_ball(ball, dt=this.dt) {
+        
+        let prev_pos = this.ball_pos
+        
+        
+        if(this.kick)
+        {
+            
+            
+            if (this.ball_collision) {
+                //let dis = ball.center_x - 
+                console.log("yes")
+                //console.log("find_reflecting_dir(prev_pos)")
+                //let new_dir = vec3(0,0,1)
+                console.log(this.linear_velocity_yz[2])
+                this.linear_velocity_yz[2] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = Math.sin(Math.PI/8)/10
+                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
+                // this.linear_velocity_yz.add_by(new_dir);
+                //this.ball_pos.add_by(new_dir)
+                //this.ball_collision = false
+                //this.ball_pos[1] += .3
+            
+            }
+            else{
+                this.linear_velocity_yz[2] = -(8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -Math.sin(Math.PI/8)/10
+                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
+                console.log(this.linear_velocity_yz[2])
+                //console.log(this.ball_pos[1])
+            }
+            
+                
+            ball.model_transform = ball.model_transform.times(Mat4.rotation(-this.spin_angle,1,0,0))
+                
+            this.spin_angle *= 0.9;
+            ++this.time;
+                
+                
+        }
+        
+        if(this.ball_pos[1]<0.68)
+        {
+            this.kick = false;
+            this.ball_collision = false;
+            console.log("kick off")
+            this.ball_pos[1] += .02
+        }
+            
     
+
+    }
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
@@ -361,6 +444,11 @@ export class Main extends Simulation {
             this.shapes.human.draw(context, program_state, this.agent_trans)
 
             const check = (element) => this.shapes.human.bound.intersects(element.bound) == true
+            const check2 = (element) => this.shapes.ball.bound.intersects(element.bound) == true
+
+        if (this.still_items.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound)) {
+            //this.shapes.human.bound.find_face_normal(this.shapes.ball.bound)
+
             
         if (this.still_items.some(check)) {
             this.collision = true
@@ -368,6 +456,25 @@ export class Main extends Simulation {
         else {
             this.collision = false
         }
+        if (this.still_items.some(check2)&&this.kick) {
+
+            this.ball_collision = true
+            //console.log("oddd")
+            //this.kick=false
+        } 
+        else if (this.shapes.field.bound.intersects2(this.shapes.ball.bound)) {
+            //this.ball_collision = true
+            
+        }
+        else {
+            if(!this.kick)
+            this.ball_collision = false
+        }
+        /* if (this.ball_pos[1] == 0) {this.kick = false
+        this.ball_collision = true} */
+        //if(this.kick ) {this.ball_collision = false}
+
+
     
         let field_transform = Mat4.identity()
                         .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
@@ -376,6 +483,41 @@ export class Main extends Simulation {
         
         // box 是表示四周的环境，我们可以改成其他的景色
         this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 40)), this.materials.sky)
+
+
+        
+        this.kicking_ball(this.shapes.ball)
+        
+        let ball_model_transform = Mat4.translation(this.ball_pos[0], this.ball_pos[1], this.ball_pos[2])
+                                                    //.times(Mat4.rotation(Math.PI/8,0,1,0))
+        this.shapes.ball.center_x[0] = this.ball_pos[0]
+        this.shapes.ball.center_x[1] = this.ball_pos[1]
+        this.shapes.ball.center_x[2] = this.ball_pos[2]
+        this.shapes.ball.update_bound()
+        this.shapes.ball.draw(context, program_state, ball_model_transform)
+        
+        
+        
+        //移动鸡，到距离转方向转面
+        this.temp -= this.move_chicken(this.shapes.chicken)
+        if (this.temp <= 0) {
+            this.chicken_direction = !this.chicken_direction
+            this.direction = - this.direction
+            this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0))
+            this.temp = this.length
+        }
+
+        //视角转换， this.first == true: 第一人称
+        if (this.first) {
+            console.log(this.agent_trans)
+        program_state.camera_inverse = Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2]).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
+        else {program_state.set_camera(this.initial_camera_location)}
+        //else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
+
+        //画障碍物
+        for (let i of this.still_items) {
+            i.draw(context, program_state, Mat4.identity(), this.materials.phong)
+        } 
 
         //移动鸡，到距离转方向转面
         this.temp -= this.move_chicken(this.shapes.chicken)
@@ -905,9 +1047,9 @@ class Soccer_ball extends SceneGraph {
 
         this.basicArrange()
         this.addParts(this.ball)
-        this.w = .6 //abs 
-        this.h = .6 // abs
-        this.d = .6
+        this.w = 1.2 //abs 
+        this.h = 1.2 // abs
+        this.d = 1.2
         this.initial_center_x = [0, 0, 0]
         this.center_x = [0, 0, 0]
         this.change_pos(this.model_transform)
@@ -916,7 +1058,7 @@ class Soccer_ball extends SceneGraph {
         
     }
     basicArrange() {
-        //this.ball.model_transform = this.model_transform.times(Mat4.scale( .5, .5, .5))
+        //this.ball.model_transform = this.model_transform.times(Mat4.translation( 0, 0, 17))
                                                        // .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
             
         
@@ -939,16 +1081,29 @@ class BoundingBox {
         this.depth = depth;
     }
 
+    // only works for +z face
+    // find_face_normal(other){   
+    //     let face_p1 = vec3(other.w/2, other.h/2, other.d/2)
+    //     let face_p2 = vec3(-other.w/2, other.h/2, other.d/2)
+    //     let face_p3 = vec3(other.w/2, -other.h/2, other.d/2)
+    //     let face_v1 = face_p2.minus(face_p1)
+    //     let face_v2 = face_p3.minus(face_p1)
+    //     console.log(face_v1.cross(face_v2))
+    //     return face_v1.cross(face_v2)
+    // }
     // 检查与另一个盒子的碰撞
     intersects(other) {
         //console.log(Math.abs(this.x + other.x), Math.abs(this.width/2 + other.width/2), Math.abs(this.z + other.z), Math.abs(this.depth/2+ other.depth/2))
         //console.log(other.x, other.z)
         return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 &&
-        Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2))
+        Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2) && Math.abs(this.y - other.y) <= this.height/2 + other.height/2)
     }
     close(other) {
         return ((Math.abs(this.x - other.x) <= this.width/2 - other.width/2 + 0.2 &&
         Math.abs(this.z - other.z) <= this.depth/2 - other.depth/2 + 0.2) && !this.intersects(other))
+    }
+    intersects2(other) {
+        return((Math.abs(this.y - other.y) <= this.height/2 + other.height/2))
     }
 }
 
