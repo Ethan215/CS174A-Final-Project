@@ -267,11 +267,7 @@ export class Main extends Simulation {
 
     }
 
-    find_reflecting_dir(initial_pos)
-    {
-        let direction = this.ball_pos.minus(initial_pos)
-        return direction.times(-1)
-    }
+    
     kicking_ball(ball, dt=this.dt) {
         
         let prev_pos = this.ball_pos
@@ -284,7 +280,6 @@ export class Main extends Simulation {
             if (this.ball_collision) {
                 //let dis = ball.center_x - 
                 console.log("yes")
-                //console.log("find_reflecting_dir(prev_pos)")
                 //let new_dir = vec3(0,0,1)
                 console.log(this.linear_velocity_yz[2])
                 this.linear_velocity_yz[2] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
@@ -721,12 +716,12 @@ class soccerNet extends SceneGraph {
         this.rod1 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod1",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
         this.rod2 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod2", material.override({texture: new Texture("assets/iron.jpg"),ambient:.3}) ) 
         this.rod3 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod3",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
-        this.rod4 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod4",  material.override({ctexture: new Texture("assets/iron.jpg"), ambient:.3})) 
-        this.rod5 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod5",  material.override({ctexture: new Texture("assets/iron.jpg"), ambient:.3})) 
-        this.rod6 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod6", material.override({ctexture: new Texture("assets/iron.jpg"), ambient:.3})) 
+        this.rod4 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod4",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
+        this.rod5 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod5",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
+        this.rod6 = new SceneGraph(new Cylindrical_Tube(5, 100), "rod6", material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
         // Two bars for obstacles
-        this.rod7 = new SceneGraph(new Cylindrical_Tube(5, 200), "rod7",  material.override({ctexture: new Texture("assets/iron.jpg"), ambient:.3})) 
-        this.rod8 = new SceneGraph(new Cylindrical_Tube(5, 200), "rod8",  material.override({ctexture: new Texture("assets/iron.jpg"), ambient:.3}))
+        this.rod7 = new SceneGraph(new Cylindrical_Tube(5, 200), "rod7",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3})) 
+        this.rod8 = new SceneGraph(new Cylindrical_Tube(5, 200), "rod8",  material.override({texture: new Texture("assets/iron.jpg"), ambient:.3}))
         // Three sides of the net of a soccer goal
         this.face1 = new SceneGraph(new Cube(), "face1", material.override({ambient:.3}))
         this.face2 = new SceneGraph(new Triangle(), "face2", material.override({ambient:.3}))
