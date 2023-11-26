@@ -95,7 +95,6 @@ export class Main extends Simulation {
         this.back = false
         this.left = false
         this.right = false
-
         this.agent_pos = vec3(0, -.25, 30)
         this.ball_pos = vec3(0,0.7,29)  
         this.collision = false
@@ -107,12 +106,6 @@ export class Main extends Simulation {
         this.linear_velocity_yz = vec3(0,0,0)
         this.initial_camera_location = Mat4.look_at(vec3(-15, 8, 40), vec3(5, 0, 0), vec3(0, 5, 0));
         this.ball_collision = false
-
-        this.agent_pos = vec3(0, -.25, 30)  
-        this.collision = false
-        this.direction = 1
-        this.first = false
-
         //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
         
         //初始化障碍物位置，球网位置固定，鸡群只刷一只
@@ -274,8 +267,7 @@ export class Main extends Simulation {
 
     }
 
-
-
+    
     kicking_ball(ball, dt=this.dt) {
         
         let prev_pos = this.ball_pos
@@ -326,6 +318,7 @@ export class Main extends Simulation {
             this.ball_pos[1] += .02
         }
             
+
     
 
     }
@@ -443,9 +436,6 @@ export class Main extends Simulation {
 
         if (this.still_items.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound)) {
             //this.shapes.human.bound.find_face_normal(this.shapes.ball.bound)
-
-            
-        if (this.still_items.some(check)) {
             this.collision = true
         }
         else {
@@ -479,7 +469,6 @@ export class Main extends Simulation {
         // box 是表示四周的环境，我们可以改成其他的景色
         this.shapes.box.draw(context, program_state, Mat4.identity().times(Mat4.translation(0,-10,0)).times(Mat4.scale(30, 30, 40)), this.materials.sky)
 
-
         
         this.kicking_ball(this.shapes.ball)
         
@@ -508,26 +497,6 @@ export class Main extends Simulation {
         program_state.camera_inverse = Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2]).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
         else {program_state.set_camera(this.initial_camera_location)}
         //else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
-
-        //画障碍物
-        for (let i of this.still_items) {
-            i.draw(context, program_state, Mat4.identity(), this.materials.phong)
-        } 
-
-        //移动鸡，到距离转方向转面
-        this.temp -= this.move_chicken(this.shapes.chicken)
-        if (this.temp <= 0) {
-            this.chicken_direction = !this.chicken_direction
-            this.direction = - this.direction
-            this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0))
-            this.temp = this.length
-        }
-
-        //视角转换， this.first == true: 第一人称
-        if (this.first) {
-            console.log(this.agent_trans)
-        program_state.camera_inverse = Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2]).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
-        else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
 
         //画障碍物
         for (let i of this.still_items) {
