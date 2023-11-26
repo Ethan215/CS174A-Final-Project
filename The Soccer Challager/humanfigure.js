@@ -294,7 +294,7 @@ export class Main extends Simulation {
                 // this.linear_velocity_yz.add_by(new_dir);
                 //this.ball_pos.add_by(new_dir)
                 //this.ball_collision = false
-                //this.ball_pos[1] += .3
+                //this.ball_pos[1] += .3 
             
             }
             else{
