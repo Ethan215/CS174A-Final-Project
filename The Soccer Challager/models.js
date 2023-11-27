@@ -627,3 +627,65 @@ draw(context, program_state, transform) {
     
 }
 }
+
+// 边界线
+const SoccerFieldBoundary = objs.SoccerFieldBoundary =
+    class SoccerFieldBoundary extends SceneGraph {
+    constructor(material, model_transform = Mat4.identity()) {
+            super(false, 'boundary', material, model_transform);
+            // 创建边界线的形状
+            this.line_1 = new SceneGraph(new Cube(), "Line1", material) 
+            this.line_2 = new SceneGraph(new Cube(), "Line2", material) 
+            this.line_3 = new SceneGraph(new Cube(), "Line3", material) 
+            this.line_4 = new SceneGraph(new Cube(), "Line4", material)
+            
+            this.basicArrange();
+            this.addParts(this.line_1)
+            this.addParts(this.line_2)
+            this.addParts(this.line_3)
+            this.addParts(this.line_4)
+            // this.w = 2
+            // this.h = 2
+            // this.d = 2
+            // this.initial_center_x = [0, 0, 0]
+            // this.center_x = [0, 0, 0]
+            // this.change_pos(this.model_transform)
+            // this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
+        }
+        basicArrange() {
+             // 场地中心在 (0, 0, 0)，边界宽度和深度为 100 单位
+             let field_half_width = 40; // 场地一半的宽度i
+             let line_thickness = 0.2;  // 边界线的厚度
+            // left boundary
+            this.line_1.model_transform = Mat4.identity().times(Mat4.translation(-28,0.1,6)) 
+                                                         .times(Mat4.rotation(Math.PI/2,0,1,0))
+                                                         .times(Mat4.rotation(Math.PI/2,1,0,0))
+                                                         .times(Mat4.scale(32, line_thickness, line_thickness/2));                         
+            // right
+            this.line_2.model_transform = Mat4.identity().times(Mat4.translation(29,0.1,6)) 
+                                                         .times(Mat4.rotation(Math.PI/2,0,1,0))
+                                                         .times(Mat4.rotation(Math.PI/2,1,0,0))
+                                                         .times(Mat4.scale(32, line_thickness, line_thickness/2));          
+            //front
+            this.line_3.model_transform = Mat4.identity().times(Mat4.translation(0,0.1,38)) 
+                                                         .times(Mat4.rotation(Math.PI/2,1,0,0))
+                                                         .times(Mat4.scale(29, line_thickness, line_thickness/2));
+           // back
+            this.line_4.model_transform = Mat4.identity().times(Mat4.translation(0,.1,-25)) 
+                                                         .times(Mat4.rotation(Math.PI/2,1,0,0))
+                                                         .times(Mat4.scale(29, line_thickness, line_thickness/2));
+            
+            // 三个参数分别调整x（左右两边的位置）， y(高度)， z(前后位置)
+            //三个参数分别调整长度，厚度，还有知道   一个不         
+        }
+        // 绘制边界线
+        
+        draw(context, program_state, transform) {
+            // 绘制每条边界线
+            super.draw(context, program_state, transform, this.material)
+            // this.line_1.draw(context, program_state, transform, this.material);
+            // this.line_2.draw(context, program_state, transform, this.material);
+            // this.line_3.draw(context, program_state, transform, this.material);
+            // this.line_4.draw(context, program_state, transform, this.material);        
+        }
+    }
