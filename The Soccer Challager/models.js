@@ -64,10 +64,10 @@ constructor(material, model_transform=Mat4.identity()) {
     super(true, "Humanfigure", material, model_transform)
     this.leftArm = new SceneGraph(new Cube(), "LeftArm", material)
     this.rightArm = new SceneGraph(new Cube(), "RightArm", material)
-    this.body = new SceneGraph(new Cube(), "Body", material)
+    this.body = new SceneGraph(new Cube(), "Body", material.override({texture: new Texture("assets/human1.png"), color: hex_color("#bae6c2")}))
     this.head = new Head(material)
-    this.leftLeg = new SceneGraph(new Cube(), "LeftLeg", material)
-    this.rightLeg = new SceneGraph(new Cube(), "RightLeg", material)
+    this.leftLeg = new SceneGraph(new Cube(), "LeftLeg", material.override({texture: new Texture("assets/human2.png"), color: hex_color("#bae6c2")}))
+    this.rightLeg = new SceneGraph(new Cube(), "RightLeg", material.override({texture: new Texture("assets/human2.png"), color: hex_color("#bae6c2")}))
     this.fb = true
     this.w = 3 * .8 //abs 
     this.h = 7.5 *.8// abs
@@ -517,9 +517,9 @@ constructor(material, model_transform = Mat4.identity()) {
 
     this.basicArrange()
     this.addParts(this.ball)
-    this.w = 1.2 //abs 
-    this.h = 1.2 // abs
-    this.d = 1.2
+    this.w = .8 //abs 
+    this.h = .8 // abs
+    this.d = .8
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -570,8 +570,8 @@ intersects(other) {
     Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2) && Math.abs(this.y - other.y) <= this.height/2 + other.height/2)
 }
 close(other) {
-    return ((Math.abs(this.x - other.x) <= this.width/2 - other.width/2 + 0.2 &&
-    Math.abs(this.z - other.z) <= this.depth/2 - other.depth/2 + 0.2) && !this.intersects(other))
+    return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 + .2 &&
+    Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2 + .2)) //&& !this.intersects(other))
 }
 intersects2(other) {
     return((Math.abs(this.y - other.y) <= this.height/2 + other.height/2))

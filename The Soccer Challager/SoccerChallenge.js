@@ -102,6 +102,8 @@ export class Main extends Simulation {
         this.collision = false
         this.direction = 1
         this.first = false
+        this.second = false
+        this.third = false
         this.kick = false
         this.time = 0
         this.spin_angle = Math.PI
@@ -134,7 +136,7 @@ export class Main extends Simulation {
         else if (counter <= 5) {counter = -5}
         else {counter = 11}
         this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.translation(counter, 0, this.chicken_pos[1])) 
-
+        
         //位置列表中去除鸡群位置
         this.areas.splice(random, 1)
         this.face = "forward" 
@@ -160,16 +162,33 @@ export class Main extends Simulation {
             this.toggleMusic();
         });
 
-        this.key_triggered_button("First Perspective", ["f"], () => {
+        this.key_triggered_button("Follow Human", ["Control", "1"], () => {
             this.first = true
+            this.second = false
+            this.third = false
         });
-        this.key_triggered_button("Restart", ["n"], () => {
+
+        this.key_triggered_button("Camera from Left", ["Control", "2"], () => {
+            this.first = false
+            this.second = true
+            this.third = false
+        });
+        this.key_triggered_button("Camera from Right", ["Control", "3"], () => {
+            this.first = false
+            this.second = false
+            this.third = true
+        });
+
+
+        this.key_triggered_button("Initial Perspective", ["Control", "4"], () => {
+            this.first = false
+            this.second = false
+            this.third = false
+        });
+        this.key_triggered_button("Restart", ["r"], () => {
 
             this.restart()
   
-        });
-        this.key_triggered_button("Third Perspective", ["t"], () => {
-            this.first = false
         });
         
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
@@ -214,9 +233,11 @@ export class Main extends Simulation {
         });
 
         this.key_triggered_button("Kick", ["k"], () =>{
-            this.kick = true
-            this.time = 0
-            this.spin_angle = Math.PI
+            if (this.shapes.human.bound.close (this.shapes.ball.bound)) {
+                this.kick = true
+                this.time = 0
+                this.spin_angle = Math.PI
+            }
         })
 
     }
@@ -281,7 +302,6 @@ export class Main extends Simulation {
     kicking_ball(ball, dt=this.dt) {
         
         let prev_pos = this.ball_pos
-        
         
         if(this.kick)
         {
@@ -447,6 +467,7 @@ export class Main extends Simulation {
         if (this.still_items.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound)) {
             //this.shapes.human.bound.find_face_normal(this.shapes.ball.bound)
             this.collision = true
+            
         }
         else {
             this.collision = false
@@ -465,6 +486,8 @@ export class Main extends Simulation {
             if(!this.kick)
             this.ball_collision = false
         }
+
+
         /* if (this.ball_pos[1] == 0) {this.kick = false
         this.ball_collision = true} */
         //if(this.kick ) {this.ball_collision = false}
@@ -504,7 +527,14 @@ export class Main extends Simulation {
         //视角转换， this.first == true: 第一人称
         if (this.first) {
             //console.log(this.agent_trans)
-        program_state.camera_inverse = Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2]).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
+        
+        program_state.camera_inverse = Mat4.rotation(Math.PI/10, 1, 0, 0).times(Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 5,-this.agent_pos[2] - 8)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))}
+        else if (this.second) {
+            program_state.camera_inverse = Mat4.rotation(Math.PI/2, 0, 1, 0).times(Mat4.rotation(Math.PI/12, 0, 0, 1)).times(Mat4.translation(45, -12, 0))
+        }
+        else if (this.third) {
+            program_state.camera_inverse = Mat4.rotation(-Math.PI/2, 0, 1, 0).times(Mat4.rotation(-Math.PI/12, 0, 0, 1)).times(Mat4.translation(-45, -12, 0))
+        }
         else {program_state.set_camera(this.initial_camera_location)}
         //else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
 
