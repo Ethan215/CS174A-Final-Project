@@ -370,6 +370,8 @@ export class Main extends Simulation {
         //let prev_pos = this.ball_pos
         //console.log("kick on")
         //console.log(this.ball_pos[1])
+        let x_friction = .98
+        let y_friction = .98
         
         if(this.time == 0)
             this.movement_face = this.face; // prevent the angle change while the movement
@@ -377,60 +379,60 @@ export class Main extends Simulation {
         {
             if (this.ball_collision) {
                 // linear_velocity_yz is a velocity vector that has magnitude and direction in every this.time unit(like real time)
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 // point + vector = movement
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "backward")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "left")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "right")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);           
             }
             else{
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - .98*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - .98*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
@@ -509,29 +511,9 @@ export class Main extends Simulation {
 
     drawing_arrow(arrow, dt = this.dt)
     {
-
-        
-
-        
-                
-        //  if(this.face == "left")
-        //         this.kick_angle_hon += Math.PI/2;
-        // else if(this.face == "right")
-        //         this.kick_angle_hon -= Math.PI/2;
-
-        // if(this.touching_ball_time == 0)
-        // {
-        //     if(this.face == "backward")
-        //         this.kick_angle_hon -= Math.PI;
-        //     else if(this.face == "left")
-        //         this.kick_angle_hon += Math.PI/2;
-        //     else if(this.face == "right")
-        //         this.kick_angle_hon -= Math.PI/2;
-        // }
-
+        // dont ask Howard how did he come up with this, too complicated, he doesnt know how to explain
         if(!this.kick)
         {
-
             if(this.face == "backward")
             {
                 if(this.touching_ball_time == 0)
@@ -574,7 +556,7 @@ export class Main extends Simulation {
             
            
                 this.kick_angle_hon = this.varying_angle;
-                console.log(this.varying_angle)
+                //console.log(this.varying_angle)
                 ++this.touching_ball_time
         }
         
@@ -604,7 +586,7 @@ export class Main extends Simulation {
         this.dt = program_state.animation_delta_time / 1000;
         
     
-        let speed = 10.0
+//Draw human
         this.check_human_boundary()
         if (this.moving && ! this.collision) { 
             let speed = 10.0;
@@ -679,25 +661,26 @@ export class Main extends Simulation {
         else if (this.kick) {this.shapes.human.swingLeft(this.t)}
         else{this.stop_human_figure()}
 
-            // 
-            this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2]).times(Mat4.rotation(this.agent_rot[0],0,1,0)).
-                times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
+        
+        this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2])
+                                .times(Mat4.rotation(this.agent_rot[0],0,1,0))
+                                .times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
     
             //Synchronizes the center position of a character model with its actual position in world space.
-            this.shapes.human.center_x[0] = this.agent_pos[0]
-            this.shapes.human.center_x[1] = this.agent_pos[1]
-            this.shapes.human.center_x[2] = this.agent_pos[2]
-            this.shapes.human.update_bound()
+        this.shapes.human.center_x[0] = this.agent_pos[0]
+        this.shapes.human.center_x[1] = this.agent_pos[1]
+        this.shapes.human.center_x[2] = this.agent_pos[2]
+        this.shapes.human.update_bound()
 
-            this.shapes.human.draw(context, program_state, this.agent_trans)
+        this.shapes.human.draw(context, program_state, this.agent_trans)
 
+//Draw arrow
         let touch = false
         if(this.shapes.human.bound.close (this.shapes.ball.bound))
         {
             this.drawing_arrow(this.shapes.arrow)
             this.shapes.arrow.draw(context, program_state)
             touch = true
-            
         }
         
         if(!touch)
@@ -708,9 +691,9 @@ export class Main extends Simulation {
         }
             
             
-
-            const check = (element) => this.shapes.human.bound.intersects(element) == true
-            const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
+// human collision
+        const check = (element) => this.shapes.human.bound.intersects(element) == true
+        const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
 
         //human collision check
         if (this.boundings.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound) || 
@@ -722,30 +705,19 @@ export class Main extends Simulation {
             this.collision = false
         }
 
-        //ball collision check
+// ball collision check
         if (this.boundings.some(check2)|| 
         this.shapes.ball.bound.intersects (this.still_items[0].bound) || this.shapes.ball.bound.intersects (this.still_items[1].bound)&&this.kick) {
 
             this.ball_collision = true
             //console.log("oddd")
             //this.kick=false
-        } 
-        else if (this.shapes.field.bound.intersects2(this.shapes.ball.bound)) {
-            //this.ball_collision = true
-            
-        }
-        else {
+        } else {
             if(!this.kick)
             this.ball_collision = false
         }
 
-
-        /* if (this.ball_pos[1] == 0) {this.kick = false
-        this.ball_collision = true} */
-        //if(this.kick ) {this.ball_collision = false}
-
-
-    
+// Draw field
         let field_transform = Mat4.identity()
                         .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
                         .times(Mat4.scale(80, 80, 80)); // Scale to the size of a soccer field
@@ -755,7 +727,7 @@ export class Main extends Simulation {
         // box 是表示四周的环境，我们可以改成其他的景色
         this.shapes.sphere.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/1.5, 0,1,0)).times(Mat4.scale(80, 80, 80)), this.materials.sky)
 
-        
+// Draw ball        
         if(this.kick)
             this.kicking_ball(this.shapes.ball)
         // Drawing ball
@@ -778,6 +750,7 @@ export class Main extends Simulation {
             this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0))
             this.temp = this.length
         }
+//check out and goal
         this.check_goal()
         // only check the bound when not getting
         if(!this.get_goal)
@@ -811,7 +784,7 @@ export class Main extends Simulation {
                 }
           
         }  
-        //just for decoration, feel free to delete
+//just for decoration, feel free to delete
         this.shapes.flower.draw(context, program_state, this.flower_trans1, this.materials.phong)  
         this.shapes.flower.draw(context, program_state, this.flower_trans2, this.materials.phong)  
         this.shapes.flower.draw(context, program_state, this.flower_trans3, this.materials.phong)  
