@@ -1,28 +1,324 @@
-<!-- Graphics Example Code.  
-    index.html - The web page document containing the canvas (drawing surface).  It launches your JavaScript files.
--->
 <!DOCTYPE html>
-<html lang="En">
+<html lang="en">
 <head>
     <meta charset="UTF-8"/>
     <link href="assets/fav.ico" rel="icon">
-    <title>Tiny Graphics</title>
+    <title>Soccer Chanllenger</title>
+    <style>
+      
+    @keyframes scrollHorizontal {
+        0% {
+            transform: translateX(100%);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+
+    .welcome-text h1 {
+        white-space: nowrap; 
+        overflow: hidden; 
+        animation: scrollHorizontal 10s linear infinite;
+    }
+
+   
+    .container {
+        position: relative;
+        margin-top: 50px; 
+    }
+
+    .welcome-text {
+        position: absolute;
+        top: calc(60% - 80px); 
+        left: 55%;
+        transform: translate(-50%, -100%); 
+        text-align: center;
+        width: 100%;
+    }
+   
+
+            .container {
+        position: absolute;
+        top:50%;
+        left:50%;
+        margin-left: -65px;
+        margin-top: -20px;
+        width: 130px;
+        height: 40px;
+        text-align: center;
+        }
+        .button {
+        display: inline-block;
+        background-color: black;
+        border-radius: 20px;
+        border:none;
+        color: #FFFFFF;
+        text-align: center;
+        font-size: 28px;
+        padding: 20px;
+        width: 200px;
+        transition: all 0.5s;
+        cursor: pointer;
+        margin: 5px;
+        }
+
+        .button span {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition: 0.5s;
+        }
+
+        .button span:after {
+        content: '\00bb';
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        right: -20px;
+        transition: 0.5s;
+        }
+
+        .button:hover span {
+        padding-right: 25px;
+        }
+
+        .button:hover span:after {
+        opacity: 1;
+        right: 0;
+        }
+        #restartBtn, #exitBtn {
+           
+        }
+       
+        #preGameDisplay {
+        text-align: center;
+        position: fixed;
+        top: 50;
+        left: 50;
+        width: 100%;
+        height: 100%;
+        color: blue;
+        background: url('assets/Scene.jpg') no-repeat center center;
+        background-size: cover;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        }
+
+        #gameResult {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none; /* Initially hide the game result display */
+        }
+        /* Style for the main scene canvas */
+        #main-canvas {
+            width: 1000px; 
+            height: 600px; 
+        }
+        .game-rules {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: black; 
+        color: white; 
+        padding: 20px;
+        box-sizing: border-box;
+        text-align: center;
+        height: 205px; 
+        overflow-y: auto; 
+        }
+
+
+
+        #countdown {
+        position: fixed;
+        top: 20px;
+        right: 20px; 
+        color: red;
+        font-size: 20px;
+        }
+       
+
+    </style>
 </head>
 <body style="background: rgb(255, 255, 255)">
-<!-- Begin typing your web page here. -->
-<!-- The following code embeds a WebGL canvas panel, loads certain scene(s), and displays panel(s) of their controls.-->
-<div class="canvas-widget" id="main-canvas"></div>
-<script type=module>
+    
+<!-- Pre-game display section -->
+<div id="preGameDisplay">
+    <div class="container">
+        <button id="startBtn" class="button" onclick="startGame()">
+            <span>Start &#8594;</span>
+        </button>
+    </div>
+    <div class="welcome-text">
+        <h1>Welcome to Soccer Challenger Game</span></h1>
+        <h1>Get ready for an exciting game!</h1>
+    </div>
+</div>
 
-    // ********************* THE ENTRY POINT OF YOUR WHOLE PROGRAM STARTS HERE *********************
-    // Indicate which element on the page you want the Canvas_Widget to replace with a 3D WebGL area:
-    const element_to_replace = document.querySelector("#main-canvas");
-    import {Main_Scene, Additional_Scenes, Canvas_Widget} from './main-scene.js';
-    // Import the file that defines a scene.
-    const scenes = [Main_Scene, ...Additional_Scenes].map(scene => new scene());
-    // This line creates your scene.
-    new Canvas_Widget(element_to_replace, scenes);
-</script>
 
+
+    <!-- Game result display section -->
+    <div id="gameResult">
+        <h1>Game Result:</h1>
+        <p id="resultMessage"></p>
+        <button id="restartBtn" onclick="restartGame()">Restart</button>
+
+        <button id="exitBtn" onclick="exitPage()">Exit</button>
+    </div>
+    
+    
+
+    <!-- Display Countdown Timer -->
+    <div id="countdown"></div>
+
+    
+
+    
+ <!-- WebGL Canvas -->
+ <div class="canvas-widget" id="main-canvas"></div>
+ 
+<div class="game-rules" style="display: none;">
+    <h2>Game Rules:</h2>
+    <p>
+      Lalala
+    </p>
+  </div>
+  
+
+
+    <script>
+        function animateTextScroll() {
+        const textElement = document.querySelector('.welcome-text h1');
+        let scrollAmount = 0;
+        const scrollSpeed = 2; 
+
+        function scroll() {
+            scrollAmount += scrollSpeed;
+            textElement.style.transform = `translateY(-${scrollAmount}px)`;
+
+            if (scrollAmount > textElement.clientHeight) {
+                scrollAmount = 0;
+                textElement.style.transform = 'translateY(50%)'; 
+                cancelAnimationFrame(scrollAnimation);
+            } else {
+                requestAnimationFrame(scroll);
+            }
+        }
+
+        const scrollAnimation = requestAnimationFrame(scroll);
+    }
+
+
+       
+
+        let countdownInterval;
+        let gameStarted = false;
+
+        function startCountdown(durationInMinutes) {
+            const countdownDisplay = document.getElementById('countdown');
+            let timeLeft = durationInMinutes * 60;
+
+            countdownInterval = setInterval(function() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+
+                countdownDisplay.innerHTML = `Time Left：${minutes} minutes ${seconds} seconds`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownDisplay.innerHTML = 'Game Over！';
+                    endGame(); // Call endGame function when the countdown reaches zero
+                }
+
+                timeLeft--;
+            }, 1000);
+        }
+
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            document.getElementById('countdown').innerHTML = '';
+        }
+
+        function exitPage() {
+            window.close();
+        }
+
+        function startGame() {
+        if (!gameStarted) {
+            animateTextScroll();
+            resetCountdown();
+            startCountdown(0.1); // Change the duration as needed (in minutes)
+            gameStarted = true;
+            hidePreGameDisplay(); // Hide pre-game display on game start
+            showMainCanvas(); // Show the main canvas
+            showGameRules(); // Show game rules
+        }
+        }
+
+function showGameRules() {
+  const gameRules = document.querySelector('.game-rules');
+  gameRules.style.display = 'block';
+}
+
+
+        function endGame() {
+        const gameResultDisplay = document.getElementById('gameResult');
+        const resultMessage = document.getElementById('resultMessage');
+        const exitButton = document.getElementById('exitBtn');
+        const restartButton = document.getElementById('restartBtn');
+
+        // Simulated score (replace this with your actual score calculation)
+        const score = 150;
+        const winningScore = 200; // Set your winning score threshold
+
+        if (score >= winningScore) {
+            resultMessage.textContent = 'Congratulations！You won.'; 
+        } else {
+            resultMessage.textContent = 'Sorry. You lost.'; 
+        }
+
+        // Show game result display and buttons
+        gameResultDisplay.style.display = 'block';
+        exitButton.style.display = 'block';
+        restartButton.style.display = 'block';
+    }
+
+
+        function restartGame() {
+            resetCountdown();
+            window.location.reload();
+        }
+
+        function hidePreGameDisplay() {
+            const preGameDisplay = document.getElementById('preGameDisplay');
+            preGameDisplay.style.display = 'none';
+        }
+
+        function showMainCanvas() {
+            const mainCanvas = document.getElementById('main-canvas');
+            mainCanvas.style.display = 'block';
+        }
+
+        window.onload = function() {
+            // Show pre-game display when the window loads
+            const preGameDisplay = document.getElementById('preGameDisplay');
+            preGameDisplay.style.display = 'block';
+        };
+    </script>
+
+   
+    <script type="module">
+        const element_to_replace = document.querySelector("#main-canvas");
+        import { Main_Scene, Additional_Scenes, Canvas_Widget } from './main-scene.js';
+        const scenes = [Main_Scene, ...Additional_Scenes].map(scene => new scene());
+        new Canvas_Widget(element_to_replace, scenes);
+       
+    </script>
 </body>
 </html>
