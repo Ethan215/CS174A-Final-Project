@@ -561,9 +561,10 @@ export class Main extends Simulation {
         }
         
         
-        arrow.model_transform = Mat4.translation(this.agent_pos[0], this.agent_pos[1] + 5, this.agent_pos[2]-2)
+        arrow.model_transform = Mat4.translation(this.agent_pos[0], this.agent_pos[1] + 4.5, this.agent_pos[2])
                                     .times(Mat4.rotation(this.varying_angle,0,1,0))
                                     .times(Mat4.rotation(Math.PI/16,1,0,0))
+                                    .times(Mat4.translation(0,0,-2))
         
         
     }
