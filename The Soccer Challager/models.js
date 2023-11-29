@@ -4,7 +4,7 @@ import {Body, Simulation, Test_Data} from './examples/collisions-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
-const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Textured_Phong, Capped_Cylinder, Rounded_Closed_Cone, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon, Closed_Cone } = defs;
+const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Rounded_Closed_Cone, Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon, Closed_Cone } = defs;
 const objs = {}
 export {objs}
 
@@ -237,19 +237,19 @@ class soccerNet extends SceneGraph {
 constructor(material, model_transform=Mat4.identity()) {
     super(false, 'net', material, model_transform)
     // The frame of a soccer goal
-    this.rod1 = new SceneGraph(cylinder, "rod1",  material.override({texture: tex, ambient:.3})) 
-    this.rod2 = new SceneGraph(cylinder, "rod2", material.override({texture: tex,ambient:.3}) ) 
-    this.rod3 = new SceneGraph(cylinder, "rod3",  material.override({texture: tex, ambient:.3})) 
-    this.rod4 = new SceneGraph(cylinder, "rod4",  material.override({texture: tex, ambient:.3})) 
-    this.rod5 = new SceneGraph(cylinder, "rod5",  material.override({texture: tex, ambient:.3})) 
-    this.rod6 = new SceneGraph(cylinder, "rod6", material.override({texture: tex, ambient:.3})) 
+    this.rod1 = new SceneGraph(cylinder, "rod1",  material.override({texture: tex})) 
+    this.rod2 = new SceneGraph(cylinder, "rod2", material.override({texture: tex}) ) 
+    this.rod3 = new SceneGraph(cylinder, "rod3",  material.override({texture: tex})) 
+    this.rod4 = new SceneGraph(cylinder, "rod4",  material.override({texture: tex})) 
+    this.rod5 = new SceneGraph(cylinder, "rod5",  material.override({texture: tex})) 
+    this.rod6 = new SceneGraph(cylinder, "rod6", material.override({texture: tex})) 
     // Two bars for obstacles
-    this.rod7 = new SceneGraph(cylinder, "rod7",  material.override({texture: tex, ambient:.3})) 
-    this.rod8 = new SceneGraph(cylinder, "rod8",  material.override({texture: tex, ambient:.3}))
+    this.rod7 = new SceneGraph(cylinder, "rod7",  material.override({texture: tex})) 
+    this.rod8 = new SceneGraph(cylinder, "rod8",  material.override({texture: tex}))
     // Three sides of the net of a soccer goal
-    this.face1 = new SceneGraph(cube, "face1", material.override({ambient:.3}))
-    this.face2 = new SceneGraph(new Triangle(), "face2", material.override({ambient:.3}))
-    this.face3 = new SceneGraph(new Triangle(), "face3", material.override({ambient:.3}))
+    this.face1 = new SceneGraph(cube, "face1", material)
+    this.face2 = new SceneGraph(new Triangle(), "face2", material)
+    this.face3 = new SceneGraph(new Triangle(), "face3", material)
     this.collision_bound = cube
     this.reference = cube
     this.w = 12.6 //abs 
@@ -757,7 +757,7 @@ class Flower extends SceneGraph {
     constructor(material, model_transform){
         super(false, 'Arrow', material, model_transform)
         this.head = new SceneGraph(new Rounded_Closed_Cone(100, 100), "head", material)
-        this.rod = new SceneGraph(new Cylindrical_Tube(100, 100), "rod", material)
+        this.rod = new SceneGraph(cylinder, "rod", material)
         this.basicArrange()
         this.addParts(this.head)
         this.addParts(this.rod)

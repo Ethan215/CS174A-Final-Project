@@ -32,7 +32,7 @@ export class Main extends Simulation {
             
             net: new Material(new Textured_Phong(), {
                 color: hex_color("#ffffff"),
-                ambient: .5, diffusivity: .1, specularity: 0.1,
+                ambient: .4, diffusivity: .4, specularity: 0.5,
                 texture: new Texture("assets/net21.png")
             }),
             sky: new Material(new Textured_Phong(), {
@@ -66,10 +66,8 @@ export class Main extends Simulation {
  
         }
         this.shapes = {
-            tube: new Cylindrical_Tube(1, 20),
             flower: new Flower(this.materials.blank, Mat4.identity()),
             human: new HumanFigure(this.materials.phong, Mat4.scale(.8, .8, .8).times(Mat4.translation(0, 1.875, 0))),
-            ///1.4/.8
             net: new soccerNet(this.materials.net, Mat4.translation(0, 3, -30).times(Mat4.rotation(Math.PI, 0, 1, 0))),
             poly: new Regular_2D_Polygon(4, 2),
             box: new Cube(),
@@ -78,8 +76,6 @@ export class Main extends Simulation {
             chick: new Chick(this.materials.blank, Mat4.translation(0, 0, 0)),
             chicken:new Chicken(this.materials.blank, Mat4.translation(0 ,1.8, 0)),
             block2: new Block2(this.materials.block2, Mat4.identity().times(Mat4.translation(0, 0, 0))),
-            // ground: new Regular_2D_Polygon(100,100),
-            // soccer field
             field: new Regular_2D_Polygon(100, 100), // 4个顶点，1表示矩形
             ball: new Soccer_ball(this.materials.ball_skin, Mat4.scale(0.7, 0.7, 0.7)),
             field_boundary: new SoccerFieldBoundary(this.materials.boundary_material, Mat4.identity()),
@@ -87,71 +83,61 @@ export class Main extends Simulation {
 
         }
         
-        this.shapes.field.bound = new BoundingBox(0,0,0,100,1,100);
+//music        
         this.backgroundMusic = new Audio('music/background_music.mp3');
         this.backgroundMusic.loop = true;
         
-        this.flower_trans1 =Mat4.translation(15, .1, -12)
-        this.flower_trans2 = Mat4.translation(5, .1, 18) 
-        this.flower_trans3 = Mat4.translation(-12, .1, -2)
-        this.flower_trans4 = Mat4.translation(-6, .1, 7)
-        this.flower_trans5 = Mat4.translation(-3, .1, 25)
+        this.flower_trans = [Mat4.translation(15, .1, -12), Mat4.translation(5, .1, 18), Mat4.translation(-12, .1, -2)
+                            ,Mat4.translation(-6, .1, 7), Mat4.translation(-3, .1, 25), Mat4.translation(11, .1, 3)]
 
-        //human movement
+//human related
         this.moving = false
         this.forward = false
         this.back = false
         this.left = false
         this.right = false
         this.collision = false
-        this.agent_pos = vec3(0, -.25, 30)
-        this.face = "forward" 
+        this.face = "forward"
         this.agent_trans = Mat4.identity() // store the character's translation value
+        this.agent_pos = vec3(0, -.25, 30)
         this.agent_rot = vec4(0,0,0,0)   // store the character's rotation state 
         this.agent_size = 0.8      // scale
 
-        // ball related
+//ball related
         this.ball_pos = vec3(0,0.7,29)  
-        this.direction = 1
+        this.linear_velocity_yz = vec3(0,0,0)
         this.kick = false
-        this.time = 0
         this.get_goal = false
         this.ball_out = false
         this.movement_face
-        //this.spin_angle = Math.PI
-        this.linear_velocity_yz = vec3(0,0,0)
         this.ball_collision = false
+        this.time = 0
         this.kick_angle_hon = 0
         this.varying_angle = 0
-        //this.kick_angle_hon = Math.PI/8
         this.incre = false
         this.touching_ball_time = 0
-        
+        this.within_range = false
 
-
-        //perspectives
+//perspectives
         this.initial_camera_location = Mat4.look_at(vec3(-15, 8, 40), vec3(5, 0, 0), vec3(0, 5, 0));
         this.first = false
         this.second = false
         this.third = false
         this.initial = false
         
-        //把所有需要碰撞检测的东西（除了移动的主体以外放进这个列表里）
         
-        //初始化障碍物位置，球网位置固定，鸡群只刷一只
+//random-refresh related
         this.still_items = [this.shapes.net, this.shapes.chicken]
-        //随机刷新的障碍物的种类
         this.types = ["block1", "chick", "block2"]
-        //可调整： 随机生成障碍物的位置
-        this.areas = [[Math.random() * (-11+21) -21, Math.random() * (20-10) +10], 
-                        [Math.random() * (-11+21) -21, Math.random() * (-10+20) -20],
-                        [Math.random() * (-11+21) -21, Math.random() * (5+5) -5], 
+        this.areas = [[Math.random() * (-11+18) -18, Math.random() * (20-10) +10], 
+                        [Math.random() * (-11+18) -18, Math.random() * (-10+20) -20], //-18 to -11
+                        [Math.random() * (-11+18) -18, Math.random() * (5+5) -5], 
                         [Math.random() * (5+5) -5, Math.random() * (20-10) +10],
                         [Math.random() * (5+5) -5, Math.random() * (-10+20) - 20],
                         [Math.random() * (5+5) -5, Math.random() * (5+5) -5],
-                        [Math.random() * (21-11) +11, Math.random() * (20-10) +10], 
-                        [Math.random() * (21-11) +11, Math.random() * (-10+20) - 20],
-                        [Math.random() * (21-11) +11, Math.random() * (5+5) -5]]
+                        [Math.random() * (21-14) +14, Math.random() * (20-10) +10], //14 to 21
+                        [Math.random() * (21-14) +14, Math.random() * (-10+20) - 20],
+                        [Math.random() * (21-14) +14, Math.random() * (5+5) -5]]
         //随机鸡群位置
         let random = Math.floor(Math.random() * (5-0) + 0)
         this.chicken_pos = this.areas[random]
@@ -160,7 +146,7 @@ export class Main extends Simulation {
         let counter = this.chicken_pos[0]
         if (counter <= -11) {counter = -21}
         else if (counter <= 5) {counter = -5}
-        else {counter = 11}
+        else {counter = 12}
         this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.translation(counter, 0, this.chicken_pos[1])) 
         for (let i = 0; i < this.shapes.field.arrays.texture_coord.length; ++i) {
             this.shapes.field.arrays.texture_coord[i].scale_by(12)
@@ -168,6 +154,7 @@ export class Main extends Simulation {
         //位置列表中去除鸡群位置
         this.areas.splice(random, 1)
 
+//bounding setting
         this.boundings = [new BoundingBox(this.areas[0][0], 0, this.areas[0][1], 0, 0, 0),
         new BoundingBox(this.areas[1][0], 0, this.areas[1][1], 0, 0, 0),
         new BoundingBox(this.areas[2][0], 0, this.areas[2][1], 0, 0, 0),
@@ -177,14 +164,14 @@ export class Main extends Simulation {
         new BoundingBox(this.areas[6][0], 0, this.areas[6][1], 0, 0, 0),
         new BoundingBox(this.areas[7][0], 0, this.areas[7][1], 0, 0, 0)]
 
-
-        
-
+ 
+//chick moving        
+        this.direction = 1
         this.length = 10
         this.temp = this.length
         this.chicken_direction = true
     
-        //random_refresh: 填充this.still_items 列表，随机位置，随机物件
+//random_refresh: 填充this.still_items 列表，随机位置，随机物件
         let num = 0
         for (let i of this.areas) {
             this.random_refresh(i, num)
@@ -196,11 +183,11 @@ export class Main extends Simulation {
  
 
     make_control_panel() {
-        // "m" to controal the background_music
+    // music
         this.key_triggered_button("Toggle Music", ["m"], () => {
             this.toggleMusic();
         });
-
+    // perspectives
         this.key_triggered_button("Follow Human", ["Control", "1"], () => {
             this.first = true
             this.second = false
@@ -217,20 +204,19 @@ export class Main extends Simulation {
             this.second = false
             this.third = true
         });
-
-
         this.key_triggered_button("Initial Perspective", ["Control", "4"], () => {
             this.first = false
             this.second = false
             this.third = false
             this.initial = true
         });
+    //restart    
         this.key_triggered_button("Restart", ["r"], () => {
 
             this.restart()
   
         });
-        
+    //human movement
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
             this.forward = true 
@@ -239,21 +225,14 @@ export class Main extends Simulation {
             this.moving = false
             this.forward = false
         });
-
-        
-
-        // Move backward
         this.key_triggered_button("Move Backward", ["ArrowDown"], () => {
             this.moving = true
             this.back = true
-  
-
 
         }, undefined, () => {
             this.moving = false
             this.back = false
         });
-
         this.key_triggered_button("Move Left", ["ArrowLeft"], () => {
             this.moving = true
             this.left = true
@@ -262,7 +241,6 @@ export class Main extends Simulation {
             this.moving = false
             this.left = false
         });
-
         this.key_triggered_button("Move Right", ["ArrowRight"], () => {
             this.moving = true
             this.right = true
@@ -271,17 +249,18 @@ export class Main extends Simulation {
             this.moving = false
             this.right = false
         });
-
+    //kick
         this.key_triggered_button("Kick", ["k"], () =>{
             if (this.shapes.human.bound.close (this.shapes.ball.bound)) {
                 this.kick = true
                 this.time = 0
+                this.within_range = false
             }
         })
 
     }
 
-    // For key_triggered_button 'm' controal music
+// music
     playMusic() {
         this.backgroundMusic.play().catch(e => console.error("Error playing music:", e));
     }
@@ -295,16 +274,19 @@ export class Main extends Simulation {
             this.pauseMusic();
         }
     }
+
     restart() {
         caches.delete()
         location.reload()
     }
-
-    // For stopping human after an obstacle collision
-    stop_human_figure() {
-        this.moving = false
-        this.shapes.human.stop_swin()
+    set_camera_init(program_state) {
+        program_state.camera_inverse = Mat4.rotation(Math.PI/10, 1, 0, 0).times(Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 8,-this.agent_pos[2] - 12)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))
+        
     }
+
+    
+
+//obstacle placing
     
     //random_refresh: refresh the blocks in the given area
     random_refresh(area, num, type=this.types[Math.floor(Math.random()*this.types.length)]) {
@@ -319,7 +301,7 @@ export class Main extends Simulation {
         this.boundings[num].height = 6*.7
         this.boundings[num].depth = .2*.7
     //console.log(this.boundings[num].w, this.boundings[num].h, this.boundings[num].d)
-}
+    }
         else if (type == "chick") {
         this.still_items.push(this.shapes.chick)
         this.boundings[num].x = area[0]
@@ -338,7 +320,6 @@ export class Main extends Simulation {
         this.boundings[num].width = 1
         this.boundings[num].height = 1.5
         this.boundings[num].depth = 1}
- 
         
     }
 
@@ -362,15 +343,21 @@ export class Main extends Simulation {
 
     }
 
-    
+// For stopping human after an obstacle collision
+        stop_human_figure() {
+            this.moving = false
+            this.shapes.human.stop_swin()
+        }
+
+//kicking ball
+
     kicking_ball(ball, dt=this.dt) {
+
         let kick_angle = -Math.sin(this.kick_angle_hon)/10 
         if(this.movement_face == "left" || this.movement_face == "right")
-        kick_angle = Math.cos(this.kick_angle_hon)/10 
-        //let prev_pos = this.ball_pos
-        //console.log("kick on")
-        //console.log(this.ball_pos[1])
-        let x_friction = .98
+            kick_angle = Math.cos(this.kick_angle_hon)/10 
+
+        let x_friction = .48
         let y_friction = .98
         
         if(this.time == 0)
@@ -441,7 +428,7 @@ export class Main extends Simulation {
         // spinning, from ethan
         let rotation_angle = this.linear_velocity_yz.norm() / .8 * this.time;
         ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,1,0,0))
-        console.log(kick_angle)
+
          ++this.time;
         
         // stop kick condition
@@ -449,20 +436,12 @@ export class Main extends Simulation {
         {
             this.kick = false;
             this.ball_collision = false;
-            
-            //console.log("kick off")
-            // correct ball's position
             this.ball_pos[1] = .699
-            //console.log(this.ball_pos[1])
         }
             
     }
-    set_camera_init(program_state) {
-        //console.log(3)
-        program_state.camera_inverse = Mat4.rotation(Math.PI/10, 1, 0, 0).times(Mat4.translation(-this.agent_pos[0],this.agent_pos[1] - 8,-this.agent_pos[2] - 12)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1))
-        
-    }
-
+   
+//checking goal / boundary / kicking range
     check_goal()
     {// check passing through the imagine goal
         if((this.ball_pos[0] >= -4.6 || this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
@@ -509,6 +488,42 @@ export class Main extends Simulation {
             this.agent_pos[2] -= 0.2
     }
 
+    within_the_range(){
+        
+        let in_range = false
+        if(this.face == "forward")
+        {
+            if((this.agent_pos[2] > this.ball_pos[2]) &&
+               (this.agent_pos[0] <= this.ball_pos[0] + 1) &&
+               (this.agent_pos[0] >= this.ball_pos[0] - 1))
+                in_range = true
+        }
+        else if(this.face == "backward")
+        {
+            if((this.agent_pos[2] < this.ball_pos[2]) &&
+               (this.agent_pos[0] <= this.ball_pos[0] + 1) &&
+               (this.agent_pos[0] >= this.ball_pos[0] - 1))
+                in_range = true
+        }
+        else if(this.face == "left")
+        {
+            if((this.agent_pos[0] > this.ball_pos[0]) &&
+               (this.agent_pos[2] <= this.ball_pos[2] + 1) &&
+               (this.agent_pos[2] >= this.ball_pos[2] - 1))
+                in_range = true
+        }
+        else if(this.face == "right")
+        {
+            if((this.agent_pos[0] < this.ball_pos[0]) &&
+               (this.agent_pos[2] <= this.ball_pos[2] + 1) &&
+               (this.agent_pos[2] >= this.ball_pos[2] - 1))
+                in_range = true
+        }
+        
+        return in_range
+    }
+
+//drawing arrow    
     drawing_arrow(arrow, dt = this.dt)
     {
         // dont ask Howard how did he come up with this, too complicated, he doesnt know how to explain
@@ -555,17 +570,14 @@ export class Main extends Simulation {
                 this.varying_angle -= Math.PI/180 * dt*40
             
            
-                this.kick_angle_hon = this.varying_angle;
-                //console.log(this.varying_angle)
-                ++this.touching_ball_time
+            this.kick_angle_hon = this.varying_angle;
+            ++this.touching_ball_time
         }
-        
         
         arrow.model_transform = Mat4.translation(this.agent_pos[0], this.agent_pos[1] + 4.5, this.agent_pos[2])
                                     .times(Mat4.rotation(this.varying_angle,0,1,0))
                                     .times(Mat4.rotation(Math.PI/16,1,0,0))
                                     .times(Mat4.translation(0,0,-2))
-        
         
     }
 
@@ -585,10 +597,38 @@ export class Main extends Simulation {
 
         this.t = program_state.animation_time / 1000;
         this.dt = program_state.animation_delta_time / 1000;
+
+//Draw field
+        let field_transform = Mat4.identity()
+                        .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
+                        .times(Mat4.scale(80, 80, 80)); // Scale to the size of a soccer field
+        this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
+        this.shapes.field_boundary.draw(context, program_state, Mat4.identity())
+        
+        // box 是表示四周的环境，我们可以改成其他的景色
+        this.shapes.sphere.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/1.5, 0,1,0)).times(Mat4.scale(80, 80, 80)), this.materials.sky)
+
+//Draw arrow
+        let touch = false
+        if(this.shapes.human.bound.close (this.shapes.ball.bound)
+        &&(this.within_the_range()))
+        {
+            this.drawing_arrow(this.shapes.arrow)
+            this.shapes.arrow.draw(context, program_state)
+            touch = true
+        }
+        
+        if(!touch)
+        {
+            this.touching_ball_time = 0;
+            this.incre = false
+            this.varying_angle = 0;
+        }
         
     
-//Draw human
+//human
         this.check_human_boundary()
+        //check direction and face orientation
         if (this.moving && ! this.collision) { 
             let speed = 10.0;
             this.shapes.human.swingArm(program_state.animation_time / 300)  // Changing the swing time
@@ -659,10 +699,10 @@ export class Main extends Simulation {
             this.stop_human_figure()  // let move = false
             
         }
-        else if (this.kick) {this.shapes.human.swingLeft(this.t)}
+        else if (this.kick && this.within_the_range()) {this.shapes.human.swingLeft(this.t)}
         else{this.stop_human_figure()}
 
-        
+    //draw human    
         this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2])
                                 .times(Mat4.rotation(this.agent_rot[0],0,1,0))
                                 .times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
@@ -675,21 +715,7 @@ export class Main extends Simulation {
 
         this.shapes.human.draw(context, program_state, this.agent_trans)
 
-//Draw arrow
-        let touch = false
-        if(this.shapes.human.bound.close (this.shapes.ball.bound))
-        {
-            this.drawing_arrow(this.shapes.arrow)
-            this.shapes.arrow.draw(context, program_state)
-            touch = true
-        }
-        
-        if(!touch)
-        {
-            this.touching_ball_time = 0;
-            this.incre = false
-            this.varying_angle = 0;
-        }
+
             
             
 // human collision
@@ -711,6 +737,10 @@ export class Main extends Simulation {
         this.shapes.ball.bound.intersects (this.still_items[0].bound) || this.shapes.ball.bound.intersects (this.still_items[1].bound)&&this.kick) {
 
             this.ball_collision = true
+            if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
+                console.log(1)
+                this.ball_pos[0] = (this.chicken_direction === true) ? this.ball_pos[0] + .1 : this.ball_pos[0] - .1
+            }
             //console.log("oddd")
             //this.kick=false
         } else {
@@ -718,19 +748,17 @@ export class Main extends Simulation {
             this.ball_collision = false
         }
 
-// Draw field
-        let field_transform = Mat4.identity()
-                        .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
-                        .times(Mat4.scale(80, 80, 80)); // Scale to the size of a soccer field
-        this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
-        this.shapes.field_boundary.draw(context, program_state, Mat4.identity())
-        
-        // box 是表示四周的环境，我们可以改成其他的景色
-        this.shapes.sphere.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/1.5, 0,1,0)).times(Mat4.scale(80, 80, 80)), this.materials.sky)
 
-// Draw ball        
-        if(this.kick)
+
+// Draw ball  
+        
+        if(this.time == 0)
+            this.within_range = this.within_the_range()
+        if(this.kick && this.within_range)
             this.kicking_ball(this.shapes.ball)
+        if(!this.within_range)
+            this.kick = false
+        console.log("kick" + this.within_range)
         // Drawing ball
         let ball_model_transform = Mat4.translation(this.ball_pos[0], this.ball_pos[1], this.ball_pos[2])
         //console.log(this.ball_pos)
@@ -743,7 +771,7 @@ export class Main extends Simulation {
         
         
         
-        //移动鸡，到距离转方向转面
+//移动鸡，到距离转方向转面
         this.temp -= this.move_chicken(this.shapes.chicken)
         if (this.temp <= 0) {
             this.chicken_direction = !this.chicken_direction
@@ -751,6 +779,7 @@ export class Main extends Simulation {
             this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0))
             this.temp = this.length
         }
+
 //check out and goal
         this.check_goal()
         // only check the bound when not getting
@@ -774,7 +803,7 @@ export class Main extends Simulation {
         else if (this.initial) {program_state.set_camera(this.initial_camera_location)}
         //else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
 
-        //画障碍物
+//画障碍物
         let num = 1
         for (let i = 0; i < this.still_items.length; i++) {
             if (i < 2) {
@@ -786,10 +815,11 @@ export class Main extends Simulation {
           
         }  
 //just for decoration, feel free to delete
-        this.shapes.flower.draw(context, program_state, this.flower_trans1, this.materials.phong)  
-        this.shapes.flower.draw(context, program_state, this.flower_trans2, this.materials.phong)  
-        this.shapes.flower.draw(context, program_state, this.flower_trans3, this.materials.phong)  
-        this.shapes.flower.draw(context, program_state, this.flower_trans4, this.materials.phong) 
-        this.shapes.flower.draw(context, program_state, this.flower_trans5, this.materials.phong) 
+
+        for (let i of this.flower_trans) {
+            this.shapes.flower.draw(context, program_state, i, this.materials.phong)
+        }
     } 
 }
+
+
