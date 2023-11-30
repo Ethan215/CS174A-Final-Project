@@ -53,7 +53,7 @@ export class Main extends Simulation {
             grass: new Material(new Textured_Phong(), {
                 color: hex_color("#00FF00"), // 绿色草地
                 ambient: 0.4, diffusivity: 0.5, specularity: 0.1,
-                texture: new Texture("assets/grass.jpg", "LINEAR")
+                texture: new Texture("assets/grass.jpg", "LINEAR_MIPMAP_LINEAR")
 
             }),
             boundary_material: new Material(new Textured_Phong(),
