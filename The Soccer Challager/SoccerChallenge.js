@@ -446,9 +446,12 @@ export class Main extends Simulation {
     {// check passing through the imagine goal
         if((this.ball_pos[0] >= -4.6 || this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
            (this.ball_pos[1] >= .9 || this.ball_pos[1] <= 4.7) &&    // 0.9 < y < 4.7
-           (this.ball_pos[2] <= -26.4) )                             //       z < -26.4
+           (this.ball_pos[2] <= -25) )                             //       z < -25
+            {
                 this.get_goal = true;
-            //console.log(this.get_goal)
+                window.endGame("Congratulation!");
+            }    
+            console.log(this.get_goal)
     }
 
     check_out_of_bound()
@@ -738,7 +741,7 @@ export class Main extends Simulation {
 
             this.ball_collision = true
             if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
-                console.log(1)
+                //console.log(1)
                 this.ball_pos[0] = (this.chicken_direction === true) ? this.ball_pos[0] + .1 : this.ball_pos[0] - .1
             }
             //console.log("oddd")
@@ -758,7 +761,7 @@ export class Main extends Simulation {
             this.kicking_ball(this.shapes.ball)
         if(!this.within_range)
             this.kick = false
-        console.log("kick" + this.within_range)
+        //console.log("kick" + this.within_range)
         // Drawing ball
         let ball_model_transform = Mat4.translation(this.ball_pos[0], this.ball_pos[1], this.ball_pos[2])
         //console.log(this.ball_pos)
