@@ -13,6 +13,8 @@ let cube = new Cube()
 let cylinder = new Capped_Cylinder(5, 100)
 let tex = new Texture("assets/iron.jpg")
 let tex2 = new Texture("assets/human2.png") 
+let tex3 = new Texture("assets/white.jpeg")
+let cone = new Closed_Cone(100,100)
 let sphere = new Subdivision_Sphere(4)
 let poly = new Regular_2D_Polygon(100, 100)
 
@@ -374,10 +376,10 @@ constructor(material, model_transform=Mat4.identity()) {
     super(false, "block1", material, model_transform)
 
     this.model_transform = Mat4.scale(.7, .7, .7)
-    this.rod1 = new SceneGraph(cylinder, "rod11",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
-    this.rod2 = new SceneGraph(cylinder, "rod21",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
-    this.face1 = new SceneGraph(cube, "face1", material)
-    this.face2 = new SceneGraph(cube, "face2", material)
+    this.rod1 = new SceneGraph(cylinder, "rod11",  this.material.override({texture: tex, specularity:.1}))
+    this.rod2 = new SceneGraph(cylinder, "rod21",  this.material.override({texture: tex, specularity:.1}))
+    this.face1 = new SceneGraph(cube, "face1", this.material.override({texture: tex3, color: hex_color("#a75ed1")}))
+    this.face2 = new SceneGraph(cube, "face2", this.material.override({texture: tex3, color: hex_color("#471663")}))
 
   
 
@@ -665,7 +667,7 @@ const Block2 = objs.Block2 =
 class Block2 extends SceneGraph {
 constructor(material, model_transform){
     super(false, 'block2', material, model_transform)
-    this.main = new SceneGraph(new Closed_Cone(100, 100), "main", material)
+    this.main = new SceneGraph(cone, "main", material)
     this.plate = new SceneGraph(new Torus(100, 100), "plate", material) 
     this.basicArrange()
     this.addParts(this.main)
@@ -809,6 +811,33 @@ class Flower extends SceneGraph {
     basicArrange() {
         this.head.model_transform = Mat4.identity().times(Mat4.scale(0.4,0.4,0.7).times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0, 0, 0.8)))
         this.rod.model_transform = Mat4.identity().times(Mat4.scale(0.1,0.1,2).times(Mat4.translation(0, 0, 0.5)))
+    }
+    draw(context, program_state, transform) {
+        super.draw(context, program_state, transform, this.material)
+    }
+}
+
+const Decorate = objs.Decorate =
+    class Decorate extends SceneGraph {
+    constructor(material, model_transform) {
+        super (false, "Tree", material, model_transform) 
+            this.trunk = new SceneGraph(cylinder, "trunk", material.override({color: hex_color("#a0522d")})) 
+            this.layer1 = new SceneGraph(cone, "leave", material.override({texture: tex3, color: hex_color("#257029")}))
+            this.layer2 =  new SceneGraph(cone, "leave", material.override({texture: tex3,color: hex_color("#257029")}))
+            this.layer3 = new SceneGraph(cone, "leave", material.override({texture: tex3,color: hex_color("#49804b")}))
+            this.basicArrange()
+            this.addParts(this.trunk)
+            this.addParts(this.layer1)
+            this.addParts(this.layer2)
+            this.addParts(this.layer3)
+        }
+    basicArrange(){
+        this.trunk.model_transform = Mat4.rotation(Math.PI/2, 1, 0, 0).times(Mat4.scale(1, 1, 10))
+        this.layer1.model_transform = Mat4.rotation(Math.PI/2, -1, 0, 0).times(Mat4.scale(5.5, 5.5, 3)).times(Mat4.translation(0,0, 1.2))
+        this.layer2.model_transform = this.layer1.model_transform.times(Mat4.scale(.9, .9, 1)).times(Mat4.translation(0,0, 1.2))
+        this.layer3.model_transform = this.layer2.model_transform.times(Mat4.scale(.8, .8, 1)).times(Mat4.translation(0,0, 1.2))
+        
+    
     }
     draw(context, program_state, transform) {
         super.draw(context, program_state, transform, this.material)
