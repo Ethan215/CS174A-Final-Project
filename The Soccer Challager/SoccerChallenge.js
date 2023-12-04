@@ -449,7 +449,7 @@ export class Main extends Simulation {
            (this.ball_pos[2] <= -25) )                             //       z < -25
             {
                 this.get_goal = true;
-                window.endGame("Congratulation!");
+                window.endGame("Congratulation! You Win!");
             }    
             console.log(this.get_goal)
     }
