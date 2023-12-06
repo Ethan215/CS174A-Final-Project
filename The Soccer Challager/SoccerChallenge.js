@@ -417,6 +417,8 @@ export class Main extends Simulation {
 
         let x_friction = .48
         let y_friction = .98
+        let x_v = 8
+        let y_v = 5
         let div_v = vec3(0,0,0)
         
         
@@ -426,15 +428,15 @@ export class Main extends Simulation {
         {
             if (this.ball_collision) {
                 // linear_velocity_yz is a velocity vector that has magnitude and direction in every this.time unit(like real time)
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 // point + vector = movement
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
@@ -442,45 +444,45 @@ export class Main extends Simulation {
         }else if(this.movement_face == "backward")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "left")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "right")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);           
             }
             else{
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
@@ -525,14 +527,15 @@ export class Main extends Simulation {
 //checking goal / boundary / kicking range
     check_goal()
     {// check passing through the imagine goal
-        if((this.ball_pos[0] >= -4.6 || this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
-           (this.ball_pos[1] >= .9 || this.ball_pos[1] <= 4.7) &&    // 0.9 < y < 4.7
+        if((this.ball_pos[0] >= -4.6 && this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
+           (this.ball_pos[1] >= .9 && this.ball_pos[1] <= 4.7) &&    // 0.9 < y < 4.7
            (this.ball_pos[2] <= -25) )                             //       z < -25
             {
                 this.get_goal = true;
                 window.endGame("Congratulation! You Win!");
             }    
-            //console.log(this.get_goal)
+            console.log(this.ball_pos)
+            console.log(this.get_goal)
     }
 
 
