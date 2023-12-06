@@ -532,10 +532,24 @@ export class Main extends Simulation {
            (this.ball_pos[2] <= -25) )                             //       z < -25
             {
                 this.get_goal = true;
-                window.endGame("Congratulation! You Win!");
+                this.success_jump()
+                window.endGame("You Won!");
             }    
-            console.log(this.ball_pos)
-            console.log(this.get_goal)
+            // console.log(this.ball_pos)
+            // console.log(this.get_goal)
+    }
+
+    success_jump()
+    {
+        this.kick = false
+        
+        
+        //console.log(this.agent_pos)
+        // this.agent_pos = vec3(0, -.25, 30)
+        // this.ball_pos = vec3(0, -.25, 30)
+        this.ball_pos = this.agent_pos
+        this.ball_pos[1] += 2
+        //vec3(0.14,5,-20.8)
     }
 
 
@@ -803,7 +817,7 @@ export class Main extends Simulation {
         this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2])
                                 .times(Mat4.rotation(this.agent_rot[0],0,1,0))
                                 .times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
-    
+        //console.log(this.agent_pos)
             //Synchronizes the center position of a character model with its actual position in world space.
         this.shapes.human.center_x[0] = this.agent_pos[0]
         this.shapes.human.center_x[1] = this.agent_pos[1]
