@@ -4,6 +4,7 @@ import {Body, Simulation, Test_Data} from './examples/collisions-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
+
 const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Rounded_Closed_Cone, Textured_Phong, Capped_Cylinder, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon, Closed_Cone } = defs;
 const objs = {}
 export {objs}
@@ -12,8 +13,12 @@ let cube = new Cube()
 let cylinder = new Capped_Cylinder(5, 100)
 let tex = new Texture("assets/iron.jpg")
 let tex2 = new Texture("assets/human2.png") 
+let tex3 = new Texture("assets/white.jpeg")
+let cone = new Closed_Cone(100,100)
 let sphere = new Subdivision_Sphere(4)
 let poly = new Regular_2D_Polygon(100, 100)
+
+
 const SceneGraph = objs.SceneGraph =
 class SceneGraph{
     constructor(geometry = true, name = "", material, model_transform = Mat4.identity()) {
@@ -27,7 +32,11 @@ class SceneGraph{
         this.w = 0
         this.h = 0
         this.d = 0
+
         //this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
+
+     
+
  }
     addParts(part){ this.parts.push(part)}  //Used to add child parts to the current object.
 
@@ -45,9 +54,14 @@ class SceneGraph{
         return this.center_x  //Returns the current center of the object
     }
     update_bound() {  //Updating the bounding box of an object
+
         this.bound.x = this.center_x[0]
         this.bound.y = this.center_x[1]
         this.bound.z = this.center_x[2]
+
+        
+
+
     }
     change_pos(transform) {
         /* this.initial_center_x[0] = this.model_transform[0][3]
@@ -69,12 +83,15 @@ const HumanFigure = objs.HumanFigure =
 class HumanFigure extends SceneGraph {
 constructor(material, model_transform=Mat4.identity()) {
     super(true, "Humanfigure", material, model_transform)
+
     this.leftArm = new SceneGraph(cube, "LeftArm", material)
     this.rightArm = new SceneGraph(cube, "RightArm", material)
     this.body = new SceneGraph(cube, "Body", material.override({texture: new Texture("assets/human1.png"), color: hex_color("#bae6c2")}))
     this.head = new Head(material)
     this.leftLeg = new SceneGraph(cube, "LeftLeg", material.override({texture: tex2, color: hex_color("#bae6c2")}))
     this.rightLeg = new SceneGraph(cube, "RightLeg", material.override({texture: tex2, color: hex_color("#bae6c2")}))
+
+
     this.fb = true
     this.w = 3 * .8 //abs 
     this.h = 7.5 *.8// abs
@@ -101,6 +118,7 @@ constructor(material, model_transform=Mat4.identity()) {
                                                     .times(Mat4.scale(0.45, 1.5, 0.4))
     this.rightLeg.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0)).times(Mat4.translation(0.5, -5, 0))
                                                     .times(Mat4.scale(0.45, 1.5, 0.4))
+
     this.initialLeftArmTransform = this.leftArm.model_transform.copy();
     this.initialRightArmTransform = this.rightArm.model_transform.copy();
     this.initialLeftLegTransform = this.leftLeg.model_transform.copy();
@@ -137,7 +155,11 @@ update_bound () {
 
 draw(context, program_state, transform = Mat4.identity()) {
     
+
     super.draw(context, program_state, transform, this.material)
+
+   
+
 }
 
 swingArm(time) {
@@ -178,6 +200,7 @@ swingLeg(time) {
 
 
 }
+
 swingLeft(time) {
     let angle = -0.3
     //+ Math.abs(Math.sin(1* time) * Math.PI / 8); 
@@ -193,6 +216,7 @@ swingLeft(time) {
 
 }
 
+
 stop_swin() {
     this.leftArm.model_transform = this.initialLeftArmTransform;
     this.rightArm.model_transform = this.initialRightArmTransform;
@@ -205,9 +229,13 @@ stop_swin() {
 class Head extends SceneGraph {
 constructor(material) {
     super(false, "Head", material); 
+
     this.main = new SceneGraph(sphere, "Main", material)
     this.leye = new SceneGraph(sphere, "LeftEye", material.override({color: hex_color("#000000")}))
     this.reye = new SceneGraph(sphere, "RightEye", material.override({color: hex_color("#000000")}))
+
+ 
+
     this.transform = Mat4.identity()
 
     this.basicArrange()
@@ -237,6 +265,7 @@ class soccerNet extends SceneGraph {
 constructor(material, model_transform=Mat4.identity()) {
     super(false, 'net', material, model_transform)
     // The frame of a soccer goal
+
     this.rod1 = new SceneGraph(cylinder, "rod1",  material.override({texture: tex})) 
     this.rod2 = new SceneGraph(cylinder, "rod2", material.override({texture: tex}) ) 
     this.rod3 = new SceneGraph(cylinder, "rod3",  material.override({texture: tex})) 
@@ -252,6 +281,9 @@ constructor(material, model_transform=Mat4.identity()) {
     this.face3 = new SceneGraph(new Triangle(), "face3", material)
     this.collision_bound = cube
     this.reference = cube
+
+  
+
     this.w = 12.6 //abs 
     this.h = 6.6 // abs
     this.d = 7
@@ -342,12 +374,16 @@ const Block1 = objs.Block1 =
 class Block1 extends SceneGraph {
 constructor(material, model_transform=Mat4.identity()) {
     super(false, "block1", material, model_transform)
+
     this.model_transform = Mat4.scale(.7, .7, .7)
-    this.rod1 = new SceneGraph(cylinder, "rod11",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
-    this.rod2 = new SceneGraph(cylinder, "rod21",  this.material.override({texture: new Texture("assets/iron.jpg"), specularity:.1}))
-    this.face1 = new SceneGraph(cube, "face1", material)
-    this.face2 = new SceneGraph(cube, "face2", material)
-    this.w = 9.2 * .7
+    this.rod1 = new SceneGraph(cylinder, "rod11",  this.material.override({texture: tex, specularity:.1}))
+    this.rod2 = new SceneGraph(cylinder, "rod21",  this.material.override({texture: tex, specularity:.1}))
+    this.face1 = new SceneGraph(cube, "face1", this.material.override({texture: tex3, color: hex_color("#a75ed1")}))
+    this.face2 = new SceneGraph(cube, "face2", this.material.override({texture: tex3, color: hex_color("#471663")}))
+
+  
+
+    this.w = 10.6 * .7
     //10.6 //abs 
     this.h = 6  * .7// abs
     this.d = .2 * .7
@@ -450,6 +486,7 @@ class Chick extends SceneGraph {
 constructor(material, model_transform=Mat4.identity()) {
     super(false, "chick", material, model_transform)
     this.head = new SceneGraph(new Head(material), "head",  material)
+
     this.body = new SceneGraph(cube, "body", material)
     this.body2= new SceneGraph(cube, "body2", material)
     this.body3 = new SceneGraph(cube, "body3", material)
@@ -464,6 +501,7 @@ constructor(material, model_transform=Mat4.identity()) {
     this.leg2= new SceneGraph(cube, "mouse", material)
     this.feet1= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
     this.feet2= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
+
     this.w = 1.2 //abs 
     this.h = 3.6 // abs
     this.d = 3
@@ -534,7 +572,10 @@ const Soccer_ball = objs.Soccer_ball =
 class Soccer_ball extends SceneGraph {
 constructor(material, model_transform = Mat4.identity()) {
     super(false, "soccer_ball", material, model_transform); 
+
     this.ball = new SceneGraph(sphere, "Ball", material)
+
+    
     this.transform = Mat4.identity()
 
     this.basicArrange()
@@ -605,7 +646,9 @@ intersects2(other) {
 class Te extends SceneGraph {
 constructor(material) {
     super(false, 'te', material)
+
     this.c = new SceneGraph(cube, 'a', this.material)
+
     this.addParts(this.c)
     this.w = 2
     this.d = 2
@@ -624,7 +667,7 @@ const Block2 = objs.Block2 =
 class Block2 extends SceneGraph {
 constructor(material, model_transform){
     super(false, 'block2', material, model_transform)
-    this.main = new SceneGraph(new Closed_Cone(100, 100), "main", material)
+    this.main = new SceneGraph(cone, "main", material)
     this.plate = new SceneGraph(new Torus(100, 100), "plate", material) 
     this.basicArrange()
     this.addParts(this.main)
@@ -768,6 +811,33 @@ class Flower extends SceneGraph {
     basicArrange() {
         this.head.model_transform = Mat4.identity().times(Mat4.scale(0.4,0.4,0.7).times(Mat4.rotation(Math.PI, 0, 1, 0)).times(Mat4.translation(0, 0, 0.8)))
         this.rod.model_transform = Mat4.identity().times(Mat4.scale(0.1,0.1,2).times(Mat4.translation(0, 0, 0.5)))
+    }
+    draw(context, program_state, transform) {
+        super.draw(context, program_state, transform, this.material)
+    }
+}
+
+const Decorate = objs.Decorate =
+    class Decorate extends SceneGraph {
+    constructor(material, model_transform) {
+        super (false, "Tree", material, model_transform) 
+            this.trunk = new SceneGraph(cylinder, "trunk", material.override({color: hex_color("#a0522d")})) 
+            this.layer1 = new SceneGraph(cone, "leave", material.override({texture: tex3, color: hex_color("#257029")}))
+            this.layer2 =  new SceneGraph(cone, "leave", material.override({texture: tex3,color: hex_color("#257029")}))
+            this.layer3 = new SceneGraph(cone, "leave", material.override({texture: tex3,color: hex_color("#49804b")}))
+            this.basicArrange()
+            this.addParts(this.trunk)
+            this.addParts(this.layer1)
+            this.addParts(this.layer2)
+            this.addParts(this.layer3)
+        }
+    basicArrange(){
+        this.trunk.model_transform = Mat4.rotation(Math.PI/2, 1, 0, 0).times(Mat4.scale(1, 1, 10))
+        this.layer1.model_transform = Mat4.rotation(Math.PI/2, -1, 0, 0).times(Mat4.scale(5.5, 5.5, 3)).times(Mat4.translation(0,0, 1.2))
+        this.layer2.model_transform = this.layer1.model_transform.times(Mat4.scale(.9, .9, 1)).times(Mat4.translation(0,0, 1.2))
+        this.layer3.model_transform = this.layer2.model_transform.times(Mat4.scale(.8, .8, 1)).times(Mat4.translation(0,0, 1.2))
+        
+    
     }
     draw(context, program_state, transform) {
         super.draw(context, program_state, transform, this.material)
