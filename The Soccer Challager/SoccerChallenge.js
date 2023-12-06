@@ -1,11 +1,11 @@
 import {defs, tiny} from './examples/common.js';
 import {Body, Simulation, Test_Data} from './examples/collisions-demo.js';
 import {objs} from './models.js';
+
 //import { Simulation } from './examples/control-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
-
 const { Triangle, Square, Tetrahedron, Torus, Windmill, Cube, Subdivision_Sphere, Cylindrical_Tube, Textured_Phong, Capped_Cylinder, Rounded_Closed_Cone, Textured_Phong_text, Phong_Shader, Regular_2D_Polygon, Closed_Cone } = defs;
 const {SceneGraph, HumanFigure, soccerNet, Block1, Block2, Chick, Chicken, BoundingBox, Soccer_ball, Flower, SoccerFieldBoundary, Arrow, Decorate} = objs
 
@@ -135,8 +135,8 @@ export class Main extends Simulation {
         this.first = false
         this.second = false
         this.third = false
+   
         this.initial = false
-        
         
 //random-refresh related
         this.still_items = [this.shapes.net, this.shapes.chicken]
@@ -208,6 +208,7 @@ export class Main extends Simulation {
     // music
         this.key_triggered_button("Toggle Music", ["m"], () => {
             this.toggleMusic();
+
         });
     // perspectives
 
@@ -466,11 +467,27 @@ export class Main extends Simulation {
         }else if(this.movement_face == "right")
         {
             if (this.ball_collision) {
+                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -kick_angle
+
+                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
+            }
+            else{
+                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -kick_angle
+                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
+            }
+        }else if(this.movement_face == "right")
+        {
+            if (this.ball_collision) {
                 this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
                 this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
-                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);           
+                this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz); 
+            
             }
             else{
                 this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
@@ -520,6 +537,7 @@ export class Main extends Simulation {
         if((this.ball_pos[0] <= -28 || this.ball_pos[0] >= 29) ||  // -28 < x < 29
            (this.ball_pos[2] <= -25 || this.ball_pos[2] >= 38) )     // -25 < z < 38                
                 this.ball_out = true;
+                hasScored = true; // 直接访问并修改全局变量
             //console.log(this.ball_out)
         
         // respawn human and ball
@@ -654,8 +672,8 @@ export class Main extends Simulation {
             program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)));
         }
 
-        
-
+        // this.shapes.field_boundary.draw(context, program_state, Mat4.identity().times(Mat4.scale()));
+        // this.shapes.tree.draw(context, program_state, Mat4.identity());
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 1000);
 
@@ -868,11 +886,9 @@ export class Main extends Simulation {
             this.collision = false
         }
 
-
 // ball collision check
         if (this.boundings.some(check2)|| 
         this.shapes.ball.bound.intersects (this.still_items[0].bound) || this.shapes.ball.bound.intersects (this.still_items[1].bound)&&this.kick) {
-
             this.ball_collision = true
             if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
                 console.log(1)
@@ -881,13 +897,9 @@ export class Main extends Simulation {
             //console.log("oddd")
             //this.kick=false
         } else {
-
-
-
             if(!this.kick)
             this.ball_collision = false
         }
-
 
 
 
