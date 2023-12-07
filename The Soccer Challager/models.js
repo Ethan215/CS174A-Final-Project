@@ -386,7 +386,7 @@ constructor(material, model_transform=Mat4.identity()) {
     this.w = 10.6 * .7
     //10.6 //abs 
     this.h = 6  * .7// abs
-    this.d = .2 * .7
+    this.d = .5 * .7
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -502,9 +502,9 @@ constructor(material, model_transform=Mat4.identity()) {
     this.feet1= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
     this.feet2= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
 
-    this.w = 1.2 //abs 
+    this.w = 2.4 //abs 
     this.h = 3.6 // abs
-    this.d = 3
+    this.d = 4
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -672,9 +672,9 @@ constructor(material, model_transform){
     this.basicArrange()
     this.addParts(this.main)
     this.addParts(this.plate)
-    this.w = 1 //abs 
-    this.h = 1.5 // abs
-    this.d = 1
+    this.w = 1.1 //abs 
+    this.h = 1.8 // abs
+    this.d = 1.1
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)

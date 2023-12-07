@@ -350,9 +350,9 @@ export class Main extends Simulation {
 
         this.boundings[num].z = area[1]
         this.boundings[num].y = 6*.7*.5
-        this.boundings[num].width = 9.2*.7
+        this.boundings[num].width = 10.600*.7
         this.boundings[num].height = 6*.7
-        this.boundings[num].depth = .2*.7
+        this.boundings[num].depth = .5*.7
     //console.log(this.boundings[num].w, this.boundings[num].h, this.boundings[num].d)
     }
         else if (type == "chick") {
@@ -360,9 +360,9 @@ export class Main extends Simulation {
         this.boundings[num].x = area[0]
         this.boundings[num].z = area[1]
         this.boundings[num].y = 1.8
-        this.boundings[num].width = 1.2
+        this.boundings[num].width = 2.4
         this.boundings[num].height = 3.6
-        this.boundings[num].depth = 3
+        this.boundings[num].depth = 4
         //console.log(this.boundings[num].w, this.boundings[num].h, this.boundings[num].d)
     }
         else if (type == "block2") {
@@ -370,9 +370,9 @@ export class Main extends Simulation {
         this.boundings[num].x = area[0]
         this.boundings[num].z = area[1]
         this.boundings[num].y = .85
-        this.boundings[num].width = 1
-        this.boundings[num].height = 1.5
-        this.boundings[num].depth = 1}
+        this.boundings[num].width = 1.1
+        this.boundings[num].height = 1.8
+        this.boundings[num].depth = 1.1}
 
    
  
@@ -416,10 +416,10 @@ export class Main extends Simulation {
             kick_angle = Math.cos(this.kick_angle_hon)/10 
 
 
-        let x_friction = .48
+        let x_friction = .68
         let y_friction = .98
-        let x_v = 6
-        let y_v = 4
+        let x_v = 7
+        let y_v = 5
         let div_v = vec3(0,0,0)
         
         
