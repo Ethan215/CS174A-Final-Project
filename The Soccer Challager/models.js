@@ -673,7 +673,7 @@ constructor(material, model_transform){
     this.addParts(this.main)
     this.addParts(this.plate)
     this.w = 1.1 //abs 
-    this.h = 1.8 // abs
+    this.h = 2 // abs
     this.d = 1.1
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
