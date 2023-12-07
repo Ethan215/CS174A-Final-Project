@@ -146,9 +146,9 @@ export class Main extends Simulation {
         this.areas = [[Math.random() * (-14+20) -20, Math.random() * (20-10) +10], 
                         [Math.random() * (-14+20) -20, Math.random() * (-10+20) -20], 
                         [Math.random() * (-14+20) -20, Math.random() * (5+5) -5], 
-                        [Math.random() * (4+2) -2, Math.random() * (20-10) +10],
-                        [Math.random() * (4-4) -4, Math.random() * (-10+10) - 10],
-                        [Math.random() * (4-4) +4, Math.random() * (5-5) +5],
+                        [Math.random() * (4+4) -4, Math.random() * (20-10) +10],
+                        [Math.random() * (4+4) -4, Math.random() * (-10+20) - 20],
+                        [Math.random() * (4+4) -4, Math.random() * (5+5) -5],
                         [Math.random() * (22-16) +16, Math.random() * (20-10) +10], 
                         [Math.random() * (22-16) +16, Math.random() * (-10+20) - 20],
                         [Math.random() * (22-16) +16, Math.random() * (5+5) -5]]
