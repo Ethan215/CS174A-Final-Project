@@ -418,8 +418,8 @@ export class Main extends Simulation {
 
         let x_friction = .48
         let y_friction = .98
-        let x_v = 8
-        let y_v = 5
+        let x_v = 6
+        let y_v = 4
         let div_v = vec3(0,0,0)
         
         
@@ -495,7 +495,7 @@ export class Main extends Simulation {
         }
 // spinning
         div_v = this.linear_velocity_yz.minus(div_v)    //velocity vector
-        let rotation_angle = Math.abs(div_v.norm() / .8 * this.time * 20)/360; 
+        let rotation_angle = Math.abs(div_v.norm() / .8 * this.time * 40)/360; 
         
         //console.log(rotation_angle)
         
@@ -552,10 +552,10 @@ export class Main extends Simulation {
         
         
         //console.log(this.agent_pos)
-        // this.agent_pos = vec3(0, -.25, 30)
-        // this.ball_pos = vec3(0, -.25, 30)
-        this.ball_pos = this.agent_pos
-        this.ball_pos[1] += 2
+        this.agent_pos = vec3(0, -.25, 30)
+        this.ball_pos = vec3(0, 5.25, 30)
+        //this.ball_pos = this.agent_pos
+        //this.ball_pos[1] += 2
         //vec3(0.14,5,-20.8)
     }
 
