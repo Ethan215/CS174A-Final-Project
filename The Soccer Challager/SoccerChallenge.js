@@ -108,6 +108,7 @@ export class Main extends Simulation {
         this.left = false
         this.right = false
 
+        this.double_collide = false
         this.collision = false
         this.face = "forward"
         this.agent_trans = Mat4.identity() // store the character's translation value
@@ -146,8 +147,8 @@ export class Main extends Simulation {
                         [Math.random() * (-14+20) -20, Math.random() * (-10+20) -20], 
                         [Math.random() * (-14+20) -20, Math.random() * (5+5) -5], 
                         [Math.random() * (4+2) -2, Math.random() * (20-10) +10],
-                        [Math.random() * (4+2) -2, Math.random() * (-10+20) - 20],
-                        [Math.random() * (4+2) -2, Math.random() * (5+5) -5],
+                        [Math.random() * (4-4) -4, Math.random() * (-10+10) - 10],
+                        [Math.random() * (4-4) +4, Math.random() * (5-5) +5],
                         [Math.random() * (22-16) +16, Math.random() * (20-10) +10], 
                         [Math.random() * (22-16) +16, Math.random() * (-10+20) - 20],
                         [Math.random() * (22-16) +16, Math.random() * (5+5) -5]]
@@ -427,6 +428,8 @@ export class Main extends Simulation {
         if(this.movement_face == "forward")
         {
             if (this.ball_collision) {
+
+                this.double_collide = true
                 // linear_velocity_yz is a velocity vector that has magnitude and direction in every this.time unit(like real time)
                 this.linear_velocity_yz[2] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
                 this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
@@ -444,6 +447,7 @@ export class Main extends Simulation {
         }else if(this.movement_face == "backward")
         {
             if (this.ball_collision) {
+                this.double_collide = true
                 this.linear_velocity_yz[2] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
                 this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
@@ -459,6 +463,7 @@ export class Main extends Simulation {
         }else if(this.movement_face == "left")
         {
             if (this.ball_collision) {
+                this.double_collide = true
                 this.linear_velocity_yz[0] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
                 this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
@@ -474,6 +479,7 @@ export class Main extends Simulation {
         }else if(this.movement_face == "right")
         {
             if (this.ball_collision) {
+                this.double_collide = true
                 this.linear_velocity_yz[0] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
                 this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
@@ -508,6 +514,7 @@ export class Main extends Simulation {
         if(this.ball_pos[1]<0.68)
         {
             this.kick = false;
+            this.double_collide = false
             this.ball_collision = false;
 
             this.ball_pos[1] = .699     // correct the position
@@ -735,10 +742,13 @@ export class Main extends Simulation {
 //human
         this.check_human_boundary()
         //check direction and face orientation
+        //console.log(this.kick)
 
-       
-
-
+        const check = (element) => this.shapes.human.bound.intersects(element) == true
+        const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
+        console.log(this.double_collide)
+        /* if (this.boundings.some(check2) == false) {console.log("case1")}
+        if (!this.double_collide) {console.log("case2")} */
         if (this.moving && ! this.collision) { 
             let speed = 10.0;
             this.shapes.human.swingArm(program_state.animation_time / 300)  // Changing the swing time
@@ -752,8 +762,8 @@ export class Main extends Simulation {
                 
                     this.face = "forward";
                 }
+                this.human_direction = this.face
                 this.agent_pos[2] -= this.dt * speed;  // Decrease the human's Z-axis value
-               
     
             }
             if (this.back) {
@@ -767,6 +777,7 @@ export class Main extends Simulation {
                     
                     this.face = "backward";
                 }
+                this.human_direction = this.face
                 this.agent_pos[2] += this.dt * speed;
               
             }
@@ -780,6 +791,7 @@ export class Main extends Simulation {
     
                     this.face = "left";
                 }
+                this.human_direction = this.face
                 this.agent_pos[0] -= this.dt * speed;
                 
             }
@@ -794,20 +806,117 @@ export class Main extends Simulation {
                     
                     this.face = "right";
                 }
+                this.human_direction = this.face
                 this.agent_pos[0] += this.dt * speed;
                 
             }
         
-        }else if (this.collision) {
+        }else if (this.collision && (this.human_direction == this.face || (this.shapes.human.bound.intersects(this.shapes.ball.bound)) && !this.boundings.some(check))) {
             //.2 is used to fine-tune the position of the character in the event of a collision, 
             //so that it can "move back" or "move away" from the colliding object slightly.
-            if (this.face == "forward"){this.agent_pos[2] += .2} 
-            if (this.face == "backward") {this.agent_pos[2] -= .2}
-            if (this.face == "left") {this.agent_pos[0] += .2}
-            if (this.face == "right") {this.agent_pos[0] -= .2}
-
+            if (this.face == "forward"){
+                this.agent_pos[2] += .2
+                this.human_direction = "backward"
+            } 
+            if (this.face == "backward") {
+                this.agent_pos[2] -= .2
+                this.human_direction = "forward"
+            }
+            if (this.face == "left") {
+                this.agent_pos[0] += .2
+                this.human_direction = "right"
+            }
+            if (this.face == "right") {
+                this.agent_pos[0] -= .2
+                this.human_direction = "left"
+            }
 
             this.stop_human_figure()  // let move = false
+        }
+        //thi.kick is false after the ball stable on the ground
+        //else if ((this.collision||(this.double_collide)) && this.human_direction != this.face && (this.boundings.some(check)|| this.boundings.some(check2)))
+
+        else if ((this.collision && this.human_direction != this.face) || (this.double_collide && (this.boundings.some(check2) || (this.shapes.ball.bound.intersects(this.shapes.chicken.bound)))))
+        {
+            console.log("enter")
+            let j = 0
+            let temp
+            for (let i of this.boundings) {
+                if (i.intersects(this.shapes.ball.bound)) {
+                    temp = j
+                }
+                j++
+            }
+            if (this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) {
+                temp = 10
+            }
+            if (this.face == "forward") {
+                if (this.collision && !this.shapes.human.bound.intersects(this.shapes.ball.bound))
+                this.agent_pos[2] -= .1
+                /* if (this.ball_collision)
+                this.ball_pos[2] -= this.linear_velocity_yz[2] */
+            }
+            if (this.face == "backward") {
+                if (this.collision &&!this.shapes.human.bound.intersects(this.shapes.ball.bound))
+                this.agent_pos[2] += .1
+                /* if (this.ball_collision)
+                this.ball_pos[2] += this.linear_velocity_yz[2] */
+            }
+            if (this.face == "left") {
+                if (this.collition)
+                this.agent_pos[0] -= .1
+                /* if  (this.ball_collision)
+                this.ball_pos[0] -= this.linear_velocity_yz[0] */
+            }
+            if (this.face == "right") {
+                if (this.collision)
+                this.agent_pos[0] += .1
+                /* if (this.ball_collision)
+                this.ball_pos[0] += this.linear_velocity_yz[0] */
+            }
+            if (this.movement_face == "forward") {
+                console.log(this.current_collide, temp)
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                        console.log("gg")
+                    this.ball_pos[2] -= 1
+            
+                    console.log("here")
+                }
+                if (this.collision) {
+                    this.ball_pos[2] -= .3
+                }
+            }
+            if (this.movement_face == "backward") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    console.log(1234)
+                    this.ball_pos[2] += 1
+                    
+                    console.log("there")
+                }
+                if (this.collision) {
+                    console.log(999)
+
+                    this.ball_pos[2] += 0.3
+                }
+            }
+            if (this.movement_face == "left") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    this.ball_pos[0] -= 1
+                }
+                if (this.collision) {
+                    this.ball_pos[0] -= 0.3
+                }
+            }
+            if (this.movement_face == "right") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    this.ball_pos[0] += 1
+                }
+                if (this.collision) {
+                    this.ball_pos[0] += 0.3
+                }
+            
+
+        }
             
         }
         else if (this.kick && this.within_the_range()) {this.shapes.human.swingLeft(this.t)}
@@ -830,8 +939,7 @@ export class Main extends Simulation {
             
             
 // human collision
-        const check = (element) => this.shapes.human.bound.intersects(element) == true
-        const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
+        
 
         //human collision check
         if (this.boundings.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound) || 
@@ -885,7 +993,10 @@ export class Main extends Simulation {
             if (!this.lr) {
                 this.collision = true
                 let intervalId = setInterval(() => {
-                    
+                    if (this.face == "backward")
+                    this.agent_pos[2] -= 1*this.dt
+                    else if (this.face == "forward")
+                    this.agent_pos[2] += 1*this.dt
                     this.shapes.human.swingLeg(program_state.animation_time/300)
 
 
@@ -912,17 +1023,28 @@ export class Main extends Simulation {
         this.shapes.ball.bound.intersects (this.still_items[0].bound) || this.shapes.ball.bound.intersects (this.still_items[1].bound)&&this.kick) {
 
             this.ball_collision = true
-            if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
-                //console.log(1)
-                this.ball_pos[0] = (this.chicken_direction === true) ? this.ball_pos[0] + .1 : this.ball_pos[0] - .1
+            if (!this.double_collide) {
+                let j = 0
+                for (let i of this.boundings) {
+                    if (i.intersects(this.shapes.ball.bound)) {
+                        this.current_collide = j
+                    }
+                    j++
+                }
+                if (this.shapes.ball.bound.intersects (this.still_items[1].bound)) {this.current_collide = 10}
+    
             }
+                /* if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
+                    console.log(1)
+                    this.ball_pos[0] = (this.chicken_direction === true) ? this.ball_pos[0] + .1 : this.ball_pos[0] - .1
+                } */
             //console.log("oddd")
             //this.kick=false
         } else {
 
 
 
-            if(!this.kick)
+            if(!this.kick)//&& this.boundings.some(check2) == false)
             this.ball_collision = false
         }
 
