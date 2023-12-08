@@ -90,7 +90,7 @@ export class Main extends Simulation {
 
         }
         
-//music        
+//music and decoration       
         this.backgroundMusic = new Audio('music/background_music.mp3');
         this.backgroundMusic.loop = true;
         
@@ -98,23 +98,19 @@ export class Main extends Simulation {
                             ,Mat4.translation(-6, .1, 7), Mat4.translation(-3, .1, 25), Mat4.translation(11, .1, 3)]
 
 //human related
-
-        
-
-
         this.moving = false
         this.forward = false
         this.back = false
         this.left = false
         this.right = false
 
+        this.double_collide = false
         this.collision = false
         this.face = "forward"
-        this.agent_trans = Mat4.identity() // store the character's translation value
+        this.agent_trans = Mat4.identity()
         this.agent_pos = vec3(0, -.25, 30)
-        this.agent_rot = vec4(0,0,0,0)   // store the character's rotation state 
-        this.agent_size = 0.8      // scale
-
+        this.agent_rot = vec4(0,0,0,0)  
+        this.agent_size = 0.8      
 //ball related
         this.ball_pos = vec3(0,0.7,29)  
         this.linear_velocity_yz = vec3(0,0,0)
@@ -144,29 +140,26 @@ export class Main extends Simulation {
         this.areas = [[Math.random() * (-14+20) -20, Math.random() * (20-10) +10], 
                         [Math.random() * (-14+20) -20, Math.random() * (-10+20) -20], 
                         [Math.random() * (-14+20) -20, Math.random() * (5+5) -5], 
-                        [Math.random() * (4+2) -2, Math.random() * (20-10) +10],
-                        [Math.random() * (4+2) -2, Math.random() * (-10+20) - 20],
-                        [Math.random() * (4+2) -2, Math.random() * (5+5) -5],
+                        [Math.random() * (4+4) -4, Math.random() * (20-10) +10],
+                        [Math.random() * (4+4) -4, Math.random() * (-10+20) - 20],
+                        [Math.random() * (4+4) -4, Math.random() * (5+5) -5],
                         [Math.random() * (22-16) +16, Math.random() * (20-10) +10], 
                         [Math.random() * (22-16) +16, Math.random() * (-10+20) - 20],
                         [Math.random() * (22-16) +16, Math.random() * (5+5) -5]]
-        //随机鸡群位置
         let random = Math.floor(Math.random() * (8-0) + 0)
         this.chicken_pos = this.areas[random]
 
-        //必须保证鸡群刷新位置在bound最左侧，不然会发生障碍物之间的碰撞
+        //determine the chicken position
         this.counter = this.chicken_pos[0]
-        //console.log(this.chicken_pos[0])
         if (this.counter <= -14) {this.counter = -19}
         else if (this.counter <= 4) {this.counter = -3}
         else {
             this.counter = 14}
-        console.log(this.counter)
         this.shapes.chicken.model_transform = this.shapes.chicken.model_transform.times(Mat4.translation(this.counter, 0, this.chicken_pos[1])) 
         for (let i = 0; i < this.shapes.field.arrays.texture_coord.length; ++i) {
             this.shapes.field.arrays.texture_coord[i].scale_by(12)
         } 
-        //位置列表中去除鸡群位置
+        //strip the position of chicken
         this.areas.splice(random, 1)
 
 //bounding setting
@@ -182,21 +175,16 @@ export class Main extends Simulation {
  
 //chick moving        
         this.direction = 1
-
-
         this.length = 5
         this.temp = this.length
         this.chicken_direction = true
     
 
-//random_refresh: 填充this.still_items 列表，随机位置，随机物件
+//random_refresh: fill in this.still_items
         let num = 0
         for (let i of this.areas) {
             this.random_refresh(i, num)
             num++
-
-       
-
         }
         
     }
@@ -209,10 +197,9 @@ export class Main extends Simulation {
         this.key_triggered_button("Toggle Music", ["m"], () => {
             this.toggleMusic();
         });
+
+
     // perspectives
-
-
-
         this.key_triggered_button("Follow Human", ["Control", "1"], () => {
             this.first = true
             this.second = false
@@ -230,8 +217,6 @@ export class Main extends Simulation {
             this.third = true
         });
 
-
-
         this.key_triggered_button("Initial Perspective", ["Control", "4"], () => {
             this.first = false
             this.second = false
@@ -239,8 +224,8 @@ export class Main extends Simulation {
 
             this.initial = true
         });
-    //restart    
 
+    //restart    
         this.key_triggered_button("Restart", ["r"], () => {
 
             this.restart()
@@ -248,8 +233,6 @@ export class Main extends Simulation {
         });
 
     //human movement
-
-        
 
         this.key_triggered_button("Move Forward", ["ArrowUp"], () => {
             this.moving = true
@@ -263,11 +246,6 @@ export class Main extends Simulation {
         this.key_triggered_button("Move Backward", ["ArrowDown"], () => {
             this.moving = true
             this.back = true
-
-
-     
-
-
 
         }, undefined, () => {
             this.moving = false
@@ -293,13 +271,12 @@ export class Main extends Simulation {
         });
 
     //kick
-
-
         this.key_triggered_button("Kick", ["k"], () =>{
             if (this.shapes.human.bound.close (this.shapes.ball.bound)) {
                 this.kick = true
                 this.time = 0
-
+                this.last_pos = vec3(0,0,0)
+                this.linear_velocity_yz = vec3(0,0,0)
                 this.within_range = false
             }
         })
@@ -307,9 +284,6 @@ export class Main extends Simulation {
     }
 
 // music
-
- 
-
     playMusic() {
         this.backgroundMusic.play().catch(e => console.error("Error playing music:", e));
     }
@@ -337,7 +311,6 @@ export class Main extends Simulation {
     
 
 //obstacle placing
-    
     //random_refresh: refresh the blocks in the given area
     random_refresh(area, num, type=this.types[Math.floor(Math.random()*this.types.length)]) {
         if (type == "block1") {
@@ -347,29 +320,27 @@ export class Main extends Simulation {
 
         this.boundings[num].z = area[1]
         this.boundings[num].y = 6*.7*.5
-        this.boundings[num].width = 9.2*.7
+        this.boundings[num].width = 10.600*.7
         this.boundings[num].height = 6*.7
-        this.boundings[num].depth = .2*.7
-    //console.log(this.boundings[num].w, this.boundings[num].h, this.boundings[num].d)
+        this.boundings[num].depth = .5*.7
     }
         else if (type == "chick") {
         this.still_items.push(this.shapes.chick)
         this.boundings[num].x = area[0]
         this.boundings[num].z = area[1]
         this.boundings[num].y = 1.8
-        this.boundings[num].width = 1.2
+        this.boundings[num].width = 2.4
         this.boundings[num].height = 3.6
-        this.boundings[num].depth = 3
-        //console.log(this.boundings[num].w, this.boundings[num].h, this.boundings[num].d)
+        this.boundings[num].depth = 4
     }
         else if (type == "block2") {
         this.still_items.push(this.shapes.block2)
         this.boundings[num].x = area[0]
         this.boundings[num].z = area[1]
         this.boundings[num].y = .85
-        this.boundings[num].width = 1
-        this.boundings[num].height = 1.5
-        this.boundings[num].depth = 1}
+        this.boundings[num].width = 1.1
+        this.boundings[num].height = 2
+        this.boundings[num].depth = 1.1}
 
    
  
@@ -377,7 +348,6 @@ export class Main extends Simulation {
         
     }
 
-    //鸡群移动，length = 10
     move_chicken(chicken, dt=this.dt) {
         let speed = 5
         let temp = dt*speed
@@ -405,98 +375,123 @@ export class Main extends Simulation {
         }
 
 //kicking ball
-
     kicking_ball(ball, dt=this.dt) {
 
         let kick_angle = -Math.sin(this.kick_angle_hon)/10 
         if(this.movement_face == "left" || this.movement_face == "right")
             kick_angle = Math.cos(this.kick_angle_hon)/10 
 
-        let x_friction = .48
+
+        let x_friction = .68
         let y_friction = .98
+        let x_v = 7
+        let y_v = 5
+        let div_v = vec3(0,0,0)
+        
         
         if(this.time == 0)
             this.movement_face = this.face; // prevent the angle change while the movement
         if(this.movement_face == "forward")
         {
             if (this.ball_collision) {
+
+                this.double_collide = true
                 // linear_velocity_yz is a velocity vector that has magnitude and direction in every this.time unit(like real time)
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 // point + vector = movement
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
+                
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "backward")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[2] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.double_collide = true
+                this.linear_velocity_yz[2] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[2] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[2] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[0] = kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "left")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.double_collide = true
+                this.linear_velocity_yz[0] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
             else{
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }else if(this.movement_face == "right")
         {
             if (this.ball_collision) {
-                this.linear_velocity_yz[0] = -(8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.double_collide = true
+                this.linear_velocity_yz[0] = -(x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
 
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);           
             }
             else{
-                this.linear_velocity_yz[0] = (8*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
-                this.linear_velocity_yz[1] = 4*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
+                this.linear_velocity_yz[0] = (x_v*(this.time/1000) - x_friction*(this.time/100)*(this.time/100))
+                this.linear_velocity_yz[1] = y_v*(this.time/1000) - y_friction*(this.time/100)*(this.time/100)
                 this.linear_velocity_yz[2] = -kick_angle
                 this.ball_pos = this.ball_pos.plus(this.linear_velocity_yz);
             }
         }
+// spinning
+        div_v = this.linear_velocity_yz.minus(div_v)    //velocity vector
+        let rotation_angle = Math.abs(div_v.norm() / .8 * this.time * 40)/360; 
         
-        // spinning, from ethan
-        let rotation_angle = this.linear_velocity_yz.norm() / .8 * this.time;
-        ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,1,0,0))
-
+        
+        if(this.face == "backward")
+            ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,1,0,0))
+        else if(this.face == "left")
+            ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,0,0,1))
+        else if(this.face == "right")
+            ball.model_transform = ball.model_transform.times(Mat4.rotation(-rotation_angle,0,0,1))
+        else
+            ball.model_transform = ball.model_transform.times(Mat4.rotation(-rotation_angle,1,0,0))
+                                         
+                                                   
          ++this.time;
-        
-        // stop kick condition
-
-    
-        
 
         if(this.ball_pos[1]<0.68)
         {
             this.kick = false;
+            this.double_collide = false
             this.ball_collision = false;
 
-            this.ball_pos[1] = .699
+            this.ball_pos[1] = .699     // correct the position
+            // rotate back to the center
+            if(this.face == "backward")
+                ball.model_transform = ball.model_transform.times(Mat4.rotation(-rotation_angle,1,0,0))
+            else if(this.face == "left")
+                ball.model_transform = ball.model_transform.times(Mat4.rotation(-rotation_angle,0,0,1))
+            else if(this.face == "right")
+                ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,0,0,1))
+            else
+                ball.model_transform = ball.model_transform.times(Mat4.rotation(rotation_angle,1,0,0))
         }
             
     }
@@ -504,14 +499,22 @@ export class Main extends Simulation {
 //checking goal / boundary / kicking range
     check_goal()
     {// check passing through the imagine goal
-        if((this.ball_pos[0] >= -4.6 || this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
-           (this.ball_pos[1] >= .9 || this.ball_pos[1] <= 4.7) &&    // 0.9 < y < 4.7
+        if((this.ball_pos[0] >= -4.6 && this.ball_pos[0] <= 5.2) &&  // -4.6 < x < 5.2
+           (this.ball_pos[1] >= .9 && this.ball_pos[1] <= 4.7) &&    // 0.9 < y < 4.7
            (this.ball_pos[2] <= -25) )                             //       z < -25
             {
                 this.get_goal = true;
-                window.endGame("Congratulation! You Win!");
+                this.success_jump()
+                window.endGame("You Won!");
             }    
-            console.log(this.get_goal)
+    }
+
+    success_jump()
+    {
+        this.kick = false
+        this.agent_pos = vec3(0, -.25, 30)
+        this.ball_pos = vec3(0, 5.25, 30)
+
     }
 
 
@@ -587,10 +590,10 @@ export class Main extends Simulation {
         return in_range
     }
 
-//drawing arrow    
+//drawing arrow  
+// dont ask Howard how did he come up with this, too complicated, he doesnt know how to explain  
     drawing_arrow(arrow, dt = this.dt)
     {
-        // dont ask Howard how did he come up with this, too complicated, he doesnt know how to explain
         if(!this.kick)
         {
             if(this.face == "backward")
@@ -671,9 +674,7 @@ export class Main extends Simulation {
                         .times(Mat4.rotation(Math.PI/2, 1, 0, 0)) // Rotate to lay it flat
                         .times(Mat4.scale(80, 80, 80)); // Scale to the size of a soccer field
         this.shapes.field.draw(context, program_state, field_transform, this.materials.grass.override({color:hex_color("99ff66")}));
-        this.shapes.field_boundary.draw(context, program_state, Mat4.identity())
-        
-        // box 是表示四周的环境，我们可以改成其他的景色
+        this.shapes.field_boundary.draw(context, program_state, Mat4.identity()) 
         this.shapes.sphere.draw(context, program_state, Mat4.identity().times(Mat4.rotation(Math.PI/1.5, 0,1,0)).times(Mat4.scale(80, 80, 80)), this.materials.sky)
 
 //Draw arrow
@@ -697,9 +698,9 @@ export class Main extends Simulation {
 //human
         this.check_human_boundary()
         //check direction and face orientation
-
-       
-
+        const check = (element) => this.shapes.human.bound.intersects(element) == true
+        const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
+        console.log(this.double_collide)
 
         if (this.moving && ! this.collision) { 
             let speed = 10.0;
@@ -714,8 +715,8 @@ export class Main extends Simulation {
                 
                     this.face = "forward";
                 }
+                this.human_direction = this.face
                 this.agent_pos[2] -= this.dt * speed;  // Decrease the human's Z-axis value
-               
     
             }
             if (this.back) {
@@ -729,6 +730,7 @@ export class Main extends Simulation {
                     
                     this.face = "backward";
                 }
+                this.human_direction = this.face
                 this.agent_pos[2] += this.dt * speed;
               
             }
@@ -742,6 +744,7 @@ export class Main extends Simulation {
     
                     this.face = "left";
                 }
+                this.human_direction = this.face
                 this.agent_pos[0] -= this.dt * speed;
                 
             }
@@ -756,20 +759,111 @@ export class Main extends Simulation {
                     
                     this.face = "right";
                 }
+                this.human_direction = this.face
                 this.agent_pos[0] += this.dt * speed;
                 
             }
         
-        }else if (this.collision) {
+        }else if (this.collision && (this.human_direction == this.face || (this.shapes.human.bound.intersects(this.shapes.ball.bound)) && !this.boundings.some(check))) {
             //.2 is used to fine-tune the position of the character in the event of a collision, 
             //so that it can "move back" or "move away" from the colliding object slightly.
-            if (this.face == "forward"){this.agent_pos[2] += .2} 
-            if (this.face == "backward") {this.agent_pos[2] -= .2}
-            if (this.face == "left") {this.agent_pos[0] += .2}
-            if (this.face == "right") {this.agent_pos[0] -= .2}
-
+            if (this.face == "forward"){
+                this.agent_pos[2] += .2
+                this.human_direction = "backward"
+            } 
+            if (this.face == "backward") {
+                this.agent_pos[2] -= .2
+                this.human_direction = "forward"
+            }
+            if (this.face == "left") {
+                this.agent_pos[0] += .2
+                this.human_direction = "right"
+            }
+            if (this.face == "right") {
+                this.agent_pos[0] -= .2
+                this.human_direction = "left"
+            }
 
             this.stop_human_figure()  // let move = false
+        }
+        //this.kick is false after the ball stable on the ground
+        
+
+        //check the case for multiple collision
+        else if ((this.collision && this.human_direction != this.face) || (this.double_collide && (this.boundings.some(check2) || (this.shapes.ball.bound.intersects(this.shapes.chicken.bound)))))
+        {
+            console.log("enter")
+            let j = 0
+            let temp
+            for (let i of this.boundings) {
+                if (i.intersects(this.shapes.ball.bound)) {
+                    temp = j
+                }
+                j++
+            }
+            if (this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) {
+                temp = 10
+            }
+            if (this.face == "forward") {
+                if (this.collision && !this.shapes.human.bound.intersects(this.shapes.ball.bound))
+                this.agent_pos[2] -= .1
+ 
+            }
+            if (this.face == "backward") {
+                if (this.collision &&!this.shapes.human.bound.intersects(this.shapes.ball.bound))
+                this.agent_pos[2] += .1
+            }
+            if (this.face == "left") {
+                if (this.collition)
+                this.agent_pos[0] -= .1
+            }
+            if (this.face == "right") {
+                if (this.collision)
+                this.agent_pos[0] += .1
+            }
+            if (this.movement_face == "forward") {
+                console.log(this.current_collide, temp)
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                        console.log("gg")
+                    this.ball_pos[2] -= 1
+            
+                    console.log("here")
+                }
+                if (this.collision) {
+                    this.ball_pos[2] -= .3
+                }
+            }
+            if (this.movement_face == "backward") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    console.log(1234)
+                    this.ball_pos[2] += 1
+                    
+                    console.log("there")
+                }
+                if (this.collision) {
+                    console.log(999)
+
+                    this.ball_pos[2] += 0.3
+                }
+            }
+            if (this.movement_face == "left") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    this.ball_pos[0] -= 1
+                }
+                if (this.collision) {
+                    this.ball_pos[0] -= 0.3
+                }
+            }
+            if (this.movement_face == "right") {
+                if ((this.boundings.some(check2) || this.shapes.ball.bound.intersects(this.shapes.chicken.bound)) && this.double_collide && temp != this.current_collide) {
+                    this.ball_pos[0] += 1
+                }
+                if (this.collision) {
+                    this.ball_pos[0] += 0.3
+                }
+            
+
+        }
             
         }
         else if (this.kick && this.within_the_range()) {this.shapes.human.swingLeft(this.t)}
@@ -779,8 +873,8 @@ export class Main extends Simulation {
         this.agent_trans = Mat4.translation(this.agent_pos[0], this.agent_pos[1], this.agent_pos[2])
                                 .times(Mat4.rotation(this.agent_rot[0],0,1,0))
                                 .times(Mat4.scale(this.agent_size,this.agent_size,this.agent_size));
-    
-            //Synchronizes the center position of a character model with its actual position in world space.
+
+    //Synchronizes the center position of a character model with its actual position in world space.
         this.shapes.human.center_x[0] = this.agent_pos[0]
         this.shapes.human.center_x[1] = this.agent_pos[1]
         this.shapes.human.center_x[2] = this.agent_pos[2]
@@ -791,10 +885,7 @@ export class Main extends Simulation {
 
             
             
-// human collision
-        const check = (element) => this.shapes.human.bound.intersects(element) == true
-        const check2 = (element) => this.shapes.ball.bound.intersects(element) == true
-
+// Collision check
         //human collision check
         if (this.boundings.some(check) || this.shapes.human.bound.intersects (this.shapes.ball.bound) || 
         this.shapes.human.bound.intersects (this.still_items[0].bound)) {
@@ -847,7 +938,10 @@ export class Main extends Simulation {
             if (!this.lr) {
                 this.collision = true
                 let intervalId = setInterval(() => {
-                    
+                    if (this.face == "backward")
+                    this.agent_pos[2] -= 1*this.dt
+                    else if (this.face == "forward")
+                    this.agent_pos[2] += 1*this.dt
                     this.shapes.human.swingLeg(program_state.animation_time/300)
 
 
@@ -869,54 +963,35 @@ export class Main extends Simulation {
         }
 
 
-// ball collision check
+        // ball collision check
         if (this.boundings.some(check2)|| 
         this.shapes.ball.bound.intersects (this.still_items[0].bound) || this.shapes.ball.bound.intersects (this.still_items[1].bound)&&this.kick) {
 
             this.ball_collision = true
-            if (this.shapes.ball.bound.intersects(this.still_items[1].bound && !this.kick)) {
-                console.log(1)
-                this.ball_pos[0] = (this.chicken_direction === true) ? this.ball_pos[0] + .1 : this.ball_pos[0] - .1
+            if (!this.double_collide) {
+                let j = 0
+                for (let i of this.boundings) {
+                    if (i.intersects(this.shapes.ball.bound)) {
+                        this.current_collide = j
+                    }
+                    j++
+                }
+                if (this.shapes.ball.bound.intersects (this.still_items[1].bound)) {this.current_collide = 10}
+    
             }
-            //console.log("oddd")
-            //this.kick=false
+
         } else {
-
-
-
             if(!this.kick)
             this.ball_collision = false
         }
 
 
 
-
-// Draw ball  
-        
-        if(this.time == 0)
-            this.within_range = this.within_the_range()
-        if(this.kick && this.within_range)
-            this.kicking_ball(this.shapes.ball)
-        if(!this.within_range)
-            this.kick = false
-        console.log("kick" + this.within_range)
-        // Drawing ball
-        let ball_model_transform = Mat4.translation(this.ball_pos[0], this.ball_pos[1], this.ball_pos[2])
-        //console.log(this.ball_pos)
-                                                    
-        this.shapes.ball.center_x[0] = this.ball_pos[0]
-        this.shapes.ball.center_x[1] = this.ball_pos[1]
-        this.shapes.ball.center_x[2] = this.ball_pos[2]
-        this.shapes.ball.update_bound()
-        this.shapes.ball.draw(context, program_state, ball_model_transform)
         
         
         
 
-//移动鸡，到距离转方向转面
-
- 
-
+//Chicken Movement
         this.temp -= this.move_chicken(this.shapes.chicken)
         if (this.temp <= 0) {
             this.chicken_direction = !this.chicken_direction
@@ -932,27 +1007,40 @@ export class Main extends Simulation {
         if(!this.get_goal)
             this.check_out_of_bound()
         
-        //视角转换， this.first == true: 第一人称
+        //Change perspectives
         if(this.first) {this.set_camera_init(program_state)}
         else if (!this.second && !this.third&&!this.initial) {
-            //console.log(this.agent_trans)
             setTimeout(() => this.set_camera_init(program_state), 2000);
-        
-
         }
 
       
         else if (this.second) {
             program_state.camera_inverse = Mat4.rotation(Math.PI/2, 0, 1, 0).times(Mat4.rotation(Math.PI/12, 0, 0, 1)).times(Mat4.translation(45, -12, 0))
+
         }
         else if (this.third) {
             program_state.camera_inverse = Mat4.rotation(-Math.PI/2, 0, 1, 0).times(Mat4.rotation(-Math.PI/12, 0, 0, 1)).times(Mat4.translation(-45, -12, 0))
         }
 
         else if (this.initial) {program_state.set_camera(this.initial_camera_location)}
-        //else {program_state.set_camera(Mat4.translation(-3, -5, -45).times(Mat4.rotation(Math.PI/6,0,1,0)).map((x,i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1)))}
-
-//画障碍物
+        
+// Draw ball  
+        
+        if(this.time == 0)
+            this.within_range = this.within_the_range()
+        if(this.kick && this.within_range)
+            this.kicking_ball(this.shapes.ball)
+        if(!this.within_range)
+            this.kick = false
+        // Drawing ball
+        let ball_model_transform = Mat4.translation(this.ball_pos[0], this.ball_pos[1], this.ball_pos[2])
+                                                    
+        this.shapes.ball.center_x[0] = this.ball_pos[0]
+        this.shapes.ball.center_x[1] = this.ball_pos[1]
+        this.shapes.ball.center_x[2] = this.ball_pos[2]
+        this.shapes.ball.update_bound()
+        this.shapes.ball.draw(context, program_state, ball_model_transform)
+//Draw Blocks
         let num = 1
         for (let i = 0; i < this.still_items.length; i++) {
             if (i < 2) {
@@ -975,5 +1063,3 @@ export class Main extends Simulation {
 
     } 
 }
-
-

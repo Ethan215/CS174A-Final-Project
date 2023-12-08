@@ -30,7 +30,7 @@
         }
             .button1 {
         display: inline-block;
-        background-color: black;
+        background-color: #00BFFF;
         border-radius: 20px;
         border: none;
         color: #FFFFFF;
@@ -41,7 +41,7 @@
         transition: all 0.5s;
         cursor: pointer;
         margin: 5px;
-        margin-left: 75px; 
+        margin-left: 20px; 
     }
 
 
@@ -88,14 +88,31 @@
         padding: 0;
         }
 
-            #gameResult {
-        position: fixed;
+        #gameResult {
+        position: absolute;
         top: 50%;
-        left: 50%;
+        left: 60%;
         transform: translate(-50%, -50%);
         text-align: center;
         display: none;
-        font-size: 28px; 
+        font-size: 50px; 
+        font-family: 'Comic Sans MS', cursive, sans-serif; /* 卡通风格的字体 */
+        font-size: 2em; /* 较大的字体尺寸 */
+        color: #00BFFF; /* 天蓝色 */
+        text-shadow: 2px 2px 4px #000000;/* 黑色阴影，增加对比度 */
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.5); /* 半透明背景，增加可读性 */
+        animation: pulse 1s infinite alternate; /* 动画效果 */
+        }
+        /* 缩放动画 */
+            @keyframes pulse {
+        from {
+        transform: scale(1);
+        }
+        to {
+        transform: scale(1.1);
+        }
     }
 
         /* Style for the main scene canvas */
@@ -105,18 +122,34 @@
         }
        
 
+
         #countdown {
         position: fixed;
         top: 20px;
-        left: 50%; /* Move to the horizontal center */
-        transform: translateX(-50%); /* Adjust for centering */
-        color: white;
-        font-size: 40px;
-        -webkit-text-stroke: 1px black;
-        text-stroke: 1px black;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Comic Sans MS', cursive, sans-serif; /* 卡通风格的字体 */
+        font-size: 2em; /* 较大的字体尺寸 */
+        color: #00BFFF; /* 天蓝色 */
+        text-shadow: 2px 2px 4px #000000;/* 黑色阴影，增加对比度 */
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.5); /* 半透明背景，增加可读性 */
+        animation: pulse 1s infinite alternate; /* 动画效果 */
+        }
+        /* 缩放动画 */
+            @keyframes pulse {
+        from {
+        transform: scale(1);
+        }
+        to {
+        transform: scale(1.1);
+        }
         }
 
-       
+       .resultMessage {
+        word-wrap: break-word;
+       }
 
     </style>
 </head>
@@ -130,19 +163,18 @@
             </button>
         </div>
     </div>
-    <!-- <audio id="backgroundMusic" autoplay loop>
-        <source src="music/Winner.mp3" type="audio/mp3">
-    </audio> -->
+
+
     <!-- Game result display section -->
     <div id="gameResult" style="display: none;">
-        <h1>Game Result:</h1>
-        <p id="resultMessage"></p>
-        <button id="restartBtn" class="button1" onclick="restartGame()">
-            <span>Restart &#8594;</span>
-        </button>
-        <button id="exitBtn" class="button1" onclick="exitPage()">
-            <span>Exit &#8594;</span>
-        </button>
+        <!--<h1>Congradulation!</h1> -->
+        <p id="resultMessage" style="font-size: 3.5rem;"><p>
+            <button id="restartBtn" class="button1"  onclick="restartGame()">
+                <span>Restart &#8594;</span>
+            </button>
+            <button id="exitBtn" class="button1" onclick="exitPage()">
+                <span>Exit &#8594;</span>
+            </button>   
     </div>
     
 
@@ -218,12 +250,10 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
-                    countdownDisplay.innerHTML = 'Game Over！';
-                    if (!get_goal) {
-                        endGame('Sorry! You Lost!');
-                    }
+                    endGame('You Lost!');
+                    
                 }
-
+             
                 timeLeft--;
             }, 1000);
         }
@@ -240,7 +270,7 @@
         function startGame() {
         if (!gameStarted) {
             resetCountdown();
-            startCountdown(1); // Change the duration as needed (in minutes)
+            startCountdown(3); // Change the duration as needed (in minutes)
             gameStarted = true;
             hidePreGameDisplay(); // Hide pre-game display on game start
             showMainCanvas(); // Show the main canvas
