@@ -82,7 +82,7 @@ window.addEventListener('resize', function() {
     function startGame() {
     if (!gameStarted) {
         resetCountdown();
-        startCountdown(3); // Change the duration as needed (in minutes)
+        startCountdown(1); // Change the duration as needed (in minutes)
         gameStarted = true;
         hidePreGameDisplay(); // Hide pre-game display on game start
         showMainCanvas(); // Show the main canvas
