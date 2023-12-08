@@ -1,6 +1,5 @@
 import {defs, tiny} from './examples/common.js';
 import {Body, Simulation, Test_Data} from './examples/collisions-demo.js';
-//import { Simulation } from './examples/control-demo.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
@@ -33,10 +32,6 @@ class SceneGraph{
         this.h = 0
         this.d = 0
 
-        //this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
-
-     
-
  }
     addParts(part){ this.parts.push(part)}  //Used to add child parts to the current object.
 
@@ -59,14 +54,9 @@ class SceneGraph{
         this.bound.y = this.center_x[1]
         this.bound.z = this.center_x[2]
 
-        
-
 
     }
     change_pos(transform) {
-        /* this.initial_center_x[0] = this.model_transform[0][3]
-        this.initial_center_x[1] = this.model_transform[1][3]
-        this.initial_center_x[2] = this.model_transform[2][3] */
         this.center_x[0] = this.model_transform[0][3]
         this.center_x[1] =this.model_transform[1][3]
         this.center_x[2] =this.model_transform[2][3]
@@ -106,7 +96,6 @@ constructor(material, model_transform=Mat4.identity()) {
     this.leftArm.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0))
                                                     .times(Mat4.translation(1.4, -2.2, 0))
                                                     .times(Mat4.scale(.4, 1, .3))
-                                                //.times(Mat4.rotation(Math.PI/4, 0, 0, 1))
 
     this.rightArm.model_transform = this.model_transform.times(Mat4.translation(0, 2.75, 0)).times(Mat4.translation(-1.4, -2.2, 0))
                                                     .times(Mat4.scale(.4, 1, .3))
@@ -203,7 +192,6 @@ swingLeg(time) {
 
 swingLeft(time) {
     let angle = -0.3
-    //+ Math.abs(Math.sin(1* time) * Math.PI / 8); 
 
     this.leftLeg.model_transform = this.initialLeftLegTransform
         .times(Mat4.scale(1/.45, 1/1.5, 1/.4))
@@ -307,7 +295,6 @@ constructor(material, model_transform=Mat4.identity()) {
 }
 
 basicArrange() {
-    //这个rod很诡异，先scale再rotate会变成奇怪的东西
     this.rod1.model_transform = Mat4.identity().times(Mat4.translation(-6.3,0,-4.3))
                                 .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
                                 .times(Mat4.scale(0.3, 0.3, 6))
@@ -345,8 +332,6 @@ basicArrange() {
                                 .times(Mat4.translation(-7.6/0.3, -2.8/0.3, .5))
 
     this.face1.model_transform = Mat4.identity().times(Mat4.translation(-6.3,0,-4.3))
-                                //.times(Mat4.scale(1, 1, 0.01))
-                                //.times(Mat4.translation(1, 0, 0))
                                 .times(Mat4.rotation(-0.92729, 1, 0, 0))
                                 .times(Mat4.scale(6,4.75,0.01)) 
                                 .times(Mat4.translation(1, -.6, 250))
@@ -383,10 +368,9 @@ constructor(material, model_transform=Mat4.identity()) {
 
   
 
-    this.w = 9.2 * .7
-    //10.6 //abs 
+    this.w = 10.6 * .7
     this.h = 6  * .7// abs
-    this.d = .2 * .7
+    this.d = .5 * .7
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -406,7 +390,6 @@ basicArrange() {
                                 .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
                                 .times(Mat4.scale(0.3,0.3,6))
                                 .times(Mat4.translation(10/0.3, 0, 0))
-                                //cube default length = 2
 
     this.face1.model_transform = Mat4.identity().times(Mat4.translation(-5, 0, 0))
                                 .times(Mat4.rotation(Math.PI/24, 0, 0, 1))
@@ -441,7 +424,6 @@ constructor(material, model_transform=Mat4.identity()) {
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
-    //console.log(this.center_x)
 
     this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
     this.basicArrange()
@@ -460,7 +442,6 @@ basicArrange() {
 
 }
 
-//走路的时候扭屁股
  wobble(time, direction = 1) {
     let angle = direction * Math.sin(4*time) * Math.PI /10
     this.first.model_transform = this.first.initial_model_transform .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
@@ -502,9 +483,9 @@ constructor(material, model_transform=Mat4.identity()) {
     this.feet1= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
     this.feet2= new SceneGraph(cube, "mouse", material.override({color: hex_color ('#C96303')}))
 
-    this.w = 1.2 //abs 
+    this.w = 2.4 //abs 
     this.h = 3.6 // abs
-    this.d = 3
+    this.d = 4
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -590,19 +571,14 @@ constructor(material, model_transform = Mat4.identity()) {
     this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
     
 }
-basicArrange() {
-    //this.ball.model_transform = this.model_transform.times(Mat4.translation( 0, 0, 17))
-                                                   // .times(Mat4.rotation(-Math.PI/2, 0, 1, 0))
-        
-    
-}
+basicArrange() {}
+
 draw(context, program_state, transform) {
     super.draw(context, program_state, transform, this.material)
 }
 }
 
 
-//盒子装的检测区域，需要球体的话可以增加sphere的碰撞检测
 const BoundingBox = objs.BoundingBox =
 class BoundingBox {
 //x, y ,z is the center of the obj
@@ -615,26 +591,16 @@ constructor(x, y, z, width, height, depth) {
     this.depth = depth;
 }
 
-// only works for +z face
-// find_face_normal(other){   
-//     let face_p1 = vec3(other.w/2, other.h/2, other.d/2)
-//     let face_p2 = vec3(-other.w/2, other.h/2, other.d/2)
-//     let face_p3 = vec3(other.w/2, -other.h/2, other.d/2)
-//     let face_v1 = face_p2.minus(face_p1)
-//     let face_v2 = face_p3.minus(face_p1)
-//     console.log(face_v1.cross(face_v2))
-//     return face_v1.cross(face_v2)
-// }
-// 检查与另一个盒子的碰撞
+
+// intersection detection
 intersects(other) {
-    //console.log(Math.abs(this.x + other.x), Math.abs(this.width/2 + other.width/2), Math.abs(this.z + other.z), Math.abs(this.depth/2+ other.depth/2))
-    //console.log(other.x, other.z)
+
     return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 &&
     Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2) && Math.abs(this.y - other.y) <= this.height/2 + other.height/2)
 }
 close(other) {
     return ((Math.abs(this.x - other.x) <= this.width/2 + other.width/2 + .2 &&
-    Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2 + .2)) //&& !this.intersects(other))
+    Math.abs(this.z - other.z) <= this.depth/2 + other.depth/2 + .2)) 
 }
 intersects2(other) {
     return((Math.abs(this.y - other.y) <= this.height/2 + other.height/2))
@@ -642,7 +608,7 @@ intersects2(other) {
 }
 
 
-
+//Used for test, will not be included
 class Te extends SceneGraph {
 constructor(material) {
     super(false, 'te', material)
@@ -672,9 +638,9 @@ constructor(material, model_transform){
     this.basicArrange()
     this.addParts(this.main)
     this.addParts(this.plate)
-    this.w = 1 //abs 
-    this.h = 1.5 // abs
-    this.d = 1
+    this.w = 1.1 //abs 
+    this.h = 2 // abs
+    this.d = 1.1
     this.initial_center_x = [0, 0, 0]
     this.center_x = [0, 0, 0]
     this.change_pos(this.model_transform)
@@ -750,18 +716,10 @@ class Flower extends SceneGraph {
             this.addParts(this.line_2)
             this.addParts(this.line_3)
             this.addParts(this.line_4)
-            // this.w = 2
-            // this.h = 2
-            // this.d = 2
-            // this.initial_center_x = [0, 0, 0]
-            // this.center_x = [0, 0, 0]
-            // this.change_pos(this.model_transform)
-            // this.bound = new BoundingBox(this.center_x[0], this.center_x[1], this.center_x[2], this.w, this.h, this.d)
         }
         basicArrange() {
-             // 场地中心在 (0, 0, 0)，边界宽度和深度为 100 单位
-             let field_half_width = 40; // 场地一半的宽度i
-             let line_thickness = 0.2;  // 边界线的厚度
+             let field_half_width = 40; 
+             let line_thickness = 0.2;  
             // left boundary
             this.line_1.model_transform = Mat4.identity().times(Mat4.translation(-28,0.1,6)) 
                                                          .times(Mat4.rotation(Math.PI/2,0,1,0))
@@ -780,19 +738,11 @@ class Flower extends SceneGraph {
             this.line_4.model_transform = Mat4.identity().times(Mat4.translation(0,.1,-25)) 
                                                          .times(Mat4.rotation(Math.PI/2,1,0,0))
                                                          .times(Mat4.scale(29, line_thickness, line_thickness/2));
-            
-            // 三个参数分别调整x（左右两边的位置）， y(高度)， z(前后位置)
-            //三个参数分别调整长度，厚度，还有知道   一个不         
+                  
         }
-        // 绘制边界线
         
         draw(context, program_state, transform) {
-            // 绘制每条边界线
-            super.draw(context, program_state, transform, this.material)
-            // this.line_1.draw(context, program_state, transform, this.material);
-            // this.line_2.draw(context, program_state, transform, this.material);
-            // this.line_3.draw(context, program_state, transform, this.material);
-            // this.line_4.draw(context, program_state, transform, this.material);        
+            super.draw(context, program_state, transform, this.material)    
         }
     }
     const Arrow = objs.Arrow =

@@ -3,126 +3,9 @@
 <head>
     <meta charset="UTF-8"/>
     <link href="assets/fav.ico" rel="icon">
-<!-- 
     <link rel="stylesheet" href="styles.css">
-    <script src="SoccerChallenge.js"></script>
-    <script src="scripts.js"></script> -->
+    <script src="scripts.js"></script>
     <title>Soccer Chanllenger</title>
-    <style>
-      
-      .container {
-        position: fixed;
-        bottom: 160px; 
-        right: 200px; 
-        transform: translate(50%, 50%); 
-        
-    }
-    
-        .button {
-        display: inline-block;
-        background-color: black;
-        border-radius: 20px;
-        border:none;
-        color: #FFFFFF;
-        text-align: center;
-        font-size: 40px;
-        padding: 40px;
-        width: 300px;
-        transition: all 0.5s;
-        cursor: pointer;
-        margin: 5px;
-        }
-            .button1 {
-        display: inline-block;
-        background-color: black;
-        border-radius: 20px;
-        border: none;
-        color: #FFFFFF;
-        text-align: center;
-        font-size: 20px;
-        padding: 20px;
-        width: 200px;
-        transition: all 0.5s;
-        cursor: pointer;
-        margin: 5px;
-        margin-left: 75px; 
-    }
-
-
-        .button span ,.button1 span{
-        cursor: pointer;
-        display: inline-block;
-        position: relative;
-        transition: 0.5s;
-        }
-
-        .button span:after, .button1 span:after {
-        content: '\00bb';
-        position: absolute;
-        opacity: 0;
-        top: 0;
-        right: -20px;
-        transition: 0.5s;
-        }
-
-        .button:hover span, .button1:hover span {
-        padding-right: 25px;
-        }
-
-        .button:hover span:after, .button1:hover span:after {
-        opacity: 1;
-        right: 0;
-        }
-        #restartBtn, #exitBtn {
-           
-        }
-       
-        #preGameDisplay {
-        text-align: center;
-        position: fixed;
-        top: 50;
-        left: 50;
-        width: 100%;
-        height: 100%;
-        color: blue;
-        background: url('assets/Scene.jpg') no-repeat center center;
-        background-size: cover;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        }
-
-            #gameResult {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        display: none;
-        font-size: 28px; 
-    }
-
-        /* Style for the main scene canvas */
-        #main-canvas {
-            width: 1000px; 
-            height: 600px; 
-        }
-       
-
-        #countdown {
-        position: fixed;
-        top: 20px;
-        left: 50%; /* Move to the horizontal center */
-        transform: translateX(-50%); /* Adjust for centering */
-        color: white;
-        font-size: 40px;
-        -webkit-text-stroke: 1px black;
-        /* text-stroke: 1px black; */
-        }
-
-       
-
-    </style>
 </head>
 <body style="background: rgb(255, 255, 255)">
     
@@ -134,168 +17,25 @@
             </button>
         </div>
     </div>
-    <!-- <audio id="backgroundMusic" autoplay loop>
-        <source src="music/Winner.mp3" type="audio/mp3">
-    </audio> -->
+
+
     <!-- Game result display section -->
     <div id="gameResult" style="display: none;">
-        <h1>Game Result:</h1>
-        <p id="resultMessage"></p>
-        <button id="restartBtn" class="button1" onclick="restartGame()">
-            <span>Restart &#8594;</span>
-        </button>
-        <button id="exitBtn" class="button1" onclick="exitPage()">
-            <span>Exit &#8594;</span>
-        </button>
+        <!--<h1>Congradulation!</h1> -->
+        <p id="resultMessage" style="font-size: 3.5rem;"><p>
+            <button id="restartBtn" class="button1"  onclick="restartGame()">
+                <span>Restart &#8594;</span>
+            </button>
+            <button id="exitBtn" class="button1" onclick="exitPage()">
+                <span>Exit &#8594;</span>
+            </button>   
     </div>
     
-
         <!-- Display Countdown Timer -->
         <div id="countdown"></div>
 
         <!-- WebGL Canvas -->
         <div class="canvas-widget" id="main-canvas"></div>
-        
-
-    <script>
-        window.addEventListener('load', function() {
-        const canvas = document.querySelector('.canvas-widget canvas');
-        const AspectRatio = 1.8
-
-        let width = window.innerWidth;
-            let height = window.innerHeight;
-
-            if (width / height > AspectRatio) {
-                width = height * AspectRatio;
-            } else {
-                height = width / AspectRatio;
-            }
-
-        if (canvas) {
-            canvas.width = 1080;  
-            canvas.height = 600;  
-        }
-
-        canvas.style.width = width + "px";
-        canvas.style.height =  height + "px";
-        canvas.style.margin =  0;
-        canvas.margin =  "0px";
-
-    });
-    window.addEventListener('resize', function() {
-        const canvas = document.querySelector('.canvas-widget canvas');
-        const AspectRatio = 1.8
-
-        let width = window.innerWidth;
-            let height = window.innerHeight;
-            if (width / height > AspectRatio) {
-                width = height * AspectRatio;
-            } else {
-                height = width / AspectRatio;
-            }
-
-        if (canvas) {
-            canvas.width = 1080; 
-            canvas.height = 600; 
-            
-        }
-        canvas.style.width = width + "px";
-        canvas.style.height =  height + "px";
-        canvas.style.margin = 0 ;
-        canvas.margin =  "0px";
-
-    });
-
-
-        let countdownInterval;
-        let gameStarted = false;
-
-        function startCountdown(durationInMinutes) {
-            const countdownDisplay = document.getElementById('countdown');
-            let timeLeft = durationInMinutes * 60;
-
-            countdownInterval = setInterval(function() {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-
-                countdownDisplay.innerHTML = `${minutes} minutes ${seconds} seconds`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownDisplay.innerHTML = 'Game Over！';
-                    if (!get_goal) {
-                        endGame('Sorry! You Lost!');
-                    }
-                }
-
-                timeLeft--;
-            }, 1000);
-        }
-
-        function resetCountdown() {
-            clearInterval(countdownInterval);
-            document.getElementById('countdown').innerHTML = '';
-        }
-
-        function exitPage() {
-            window.close();
-        }
-
-        function startGame() {
-        if (!gameStarted) {
-            resetCountdown();
-            startCountdown(1); // Change the duration as needed (in minutes)
-            gameStarted = true;
-            hidePreGameDisplay(); // Hide pre-game display on game start
-            showMainCanvas(); // Show the main canvas
-           
-        }
-        }
-
-            
-            
-                
-        
-        window.endGame = function(message) {
-            const countdownDisplay = document.getElementById('countdown');
-            const gameResultDisplay = document.getElementById('gameResult');
-            const resultMessage = document.getElementById('resultMessage');
-            const exitButton = document.getElementById('exitBtn');
-            const restartButton = document.getElementById('restartBtn');
-
-            countdownDisplay.style.display = 'none';
-            gameResultDisplay.style.display = 'block';
-            exitButton.style.display = 'block';
-            restartButton.style.display = 'block';
-            resultMessage.innerHTML = message; 
-
-            clearInterval(countdownInterval);
-        }
-
-
-
-
-        function restartGame() {
-            resetCountdown();
-            window.location.reload();
-        }
-
-        function hidePreGameDisplay() {
-            const preGameDisplay = document.getElementById('preGameDisplay');
-            preGameDisplay.style.display = 'none';
-        }
-
-        function showMainCanvas() {
-            const mainCanvas = document.getElementById('main-canvas');
-            mainCanvas.style.display = 'block';
-        }
-
-        window.onload = function() {
-            // Show pre-game display when the window loads
-            const preGameDisplay = document.getElementById('preGameDisplay');
-            preGameDisplay.style.display = 'block';
-        };
-    </script>
 
    
     <script type="module">
