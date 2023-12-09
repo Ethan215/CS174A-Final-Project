@@ -15,7 +15,7 @@
 
 In "The Soccer Challenge" players step into the shoes of Mike, a young soccer enthusiast in a small town. Aspiring to join the newly-formed town soccer team, Mike embarks on a journey of skill and endurance, training in a remote soccer field.<br>
 
-![Screen when start the game](The Soccer Challager/assets/initial_img.png)
+![Screen when start the game](./The Soccer Challager/assets/initial_img.png)
 
 ## Controls
 
