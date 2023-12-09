@@ -46,6 +46,7 @@ Players need to operate Mike to avoid obstacles and kick the ball into the goal
 
 ## How to play
 
-Click the **"start"** button to begin the game, use the arrow keys to control the character's movement, and approach the ball to kick it with the **"k"** key. Pay attention to the direction of the **red arrow** above your head, as this indicates the direction the ball will roll after being kicked. Navigate the character and the ball around obstacles and score a goal within the allotted time (**1min**) to end the game, otherwise, the game ends. You can click the **"restart"** button on the end screen to restart the game
+Click the **"start"** button to begin the game, use the **arrow keys** to control the character's movement, and approach the ball to kick it with the **"k"** key. Pay attention to the direction of the **red arrow** above your head, as this indicates the direction the ball will roll after being kicked. Controal the character and the ball around obstacles and score a goal within the allotted time (**1 min**) to end the game, otherwise, failed games. You can click the **"restart"** button on the end screen to restart the game
 
 
+   
