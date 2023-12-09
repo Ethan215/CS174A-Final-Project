@@ -17,6 +17,12 @@ In "The Soccer Challenge" players step into the shoes of Mike, a young soccer en
 
 This soccer training game will create a diverse challenge environment for Mike by putting different types and shapes of obstacles on the soccer field. The placement of obstacles will cover scenarios encountered during a soccer match, including unexpected situations.\<br>
 
+## Rule:
+
+Players need to operate Mike to avoid obstacles and kick the ball into the goal
+- **Winning:** the player successfully maneuvers Mike to shoot the ball into the goal.​
+- **Failure:** Mike fails to shoot the ball into the soccer goal within one minute​
+
 ## Features
 - **Dynamic Obstacles:** Obstacles are randomly generated on the map each time you enter the game, and each obstacle is in a different location.
 - **Character Control:** Use the arrow keys on the keyboard to move and the 'k' key to control the kick.
