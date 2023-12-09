@@ -19,7 +19,7 @@ In "The Soccer Challenge" players step into the shoes of Mike, a young soccer en
 
 
 ## How to play
- [Game website]( https://ethan215.github.io/CS174A-Final-Project/) 
+ [Game website](https://ethan215.github.io/The-Soccer-Challenge/) 
  
 Click the **"start"** button to begin the game. 
 Use the **arrow keys** to control the character's movement, and approach the ball to kick it with the **"k"** key. 
