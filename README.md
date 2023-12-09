@@ -24,15 +24,18 @@ Players need to operate Mike to avoid obstacles and kick the ball into the goal
 - **Failure:** Mike fails to shoot the ball into the soccer goal within one minute​
   
 ## Controls
-- **Arrow Keys:** Move the character forward/back/left/right.
-- **"K" Key:** Kick the ball.
-- **"M" Key:** Turn on/off background music.
-- **"R" Key:** Restart the game.
-- **"ctrl" key + Number Keys "1":** Switch the camera view to the back of the character.
-- **"ctrl" key + Number Keys "2":** Switch the camera view to the left side of the scene.
-- **"ctrl" key + Number Keys "3":** Switch the camera view to the right side of the scene.
-- **"ctrl" key + Number Keys "4":**  Switch the camera viewpoint to the initial viewpoint.
-  
+
+| Key Combination | Action                               |
+|-----------------|--------------------------------------|
+| Arrow Keys      | Move the character forward/back/left/right. |
+| "K" Key         | Kick the ball.                        |
+| "M" Key         | Turn on/off background music.        |
+| "R" Key         | Restart the game.                    |
+| "Ctrl" + "1"    | Switch camera view to the back of the character. |
+| "Ctrl" + "2"    | Switch camera view to the left side of the scene. |
+| "Ctrl" + "3"    | Switch camera view to the right side of the scene. |
+| "Ctrl" + "4"    | Switch camera view to the initial viewpoint.      |
+
 ## Features
 - **Dynamic Obstacles:** Obstacles are randomly generated on the map each time you enter the game, and each obstacle is in a different location.
 - **Character Control:** Use the arrow keys on the keyboard to move and the 'k' key to control the kick.
