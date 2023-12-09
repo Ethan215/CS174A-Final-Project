@@ -45,7 +45,7 @@ Players need to operate Mike to avoid obstacles and kick the ball into the goal
 - **Camera Views:** Switch between multiple camera views for an enhanced gaming experience.
 
 ## How to play
-
+ [Game website]( https://ethan215.github.io/CS174A-Final-Project/)
 Click the **"start"** button to begin the game, use the **arrow keys** to control the character's movement, and approach the ball to kick it with the **"k"** key. Pay attention to the direction of the **red arrow** above your head, as this indicates the direction the ball will roll after being kicked. Controal the character and the ball around obstacles and score a goal within the allotted time (**1 min**) to end the game, otherwise, failed games. You can click the **"restart"** button on the end screen to restart the game
 
 
