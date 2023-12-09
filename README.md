@@ -17,6 +17,17 @@ In "The Soccer Challenge" players step into the shoes of Mike, a young soccer en
 
 ![Initial screen at the start of the game](image/initial_img.png)
 
+
+## How to play
+ [Game website]( https://ethan215.github.io/CS174A-Final-Project/) 
+ 
+Click the **"start"** button to begin the game. 
+Use the **arrow keys** to control the character's movement, and approach the ball to kick it with the **"k"** key. 
+Pay attention to the direction of the **red arrow** above your head, as this indicates the direction the ball will roll after being kicked. 
+Controal the character and the ball around obstacles and score a goal within the allotted time (**1 min**) to end the game, otherwise, failed games. 
+You can click the **"restart"** button on the end screen to restart the game
+
+
 ## Controls
 
 | Key Combination | Action                               |
@@ -44,14 +55,7 @@ Players need to operate Mike to avoid obstacles and kick the ball into the goal
 - **Boundary:** When the ball is kicked out of bounds of the soccer field, both the character and the ball will automatically return to the initial position, but the countdown will not be reset.
 - **Camera Views:** Switch between multiple camera views for an enhanced gaming experience.
 
-## How to play
- [Game website]( https://ethan215.github.io/CS174A-Final-Project/) 
- 
-Click the **"start"** button to begin the game. 
-Use the **arrow keys** to control the character's movement, and approach the ball to kick it with the **"k"** key. 
-Pay attention to the direction of the **red arrow** above your head, as this indicates the direction the ball will roll after being kicked. 
-Controal the character and the ball around obstacles and score a goal within the allotted time (**1 min**) to end the game, otherwise, failed games. 
-You can click the **"restart"** button on the end screen to restart the game
+
 
 
    
